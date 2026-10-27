@@ -22,7 +22,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local --schema public > packages/database/src/types.gen.ts",
-    "admin:create": "tsx scripts/create-super-admin.ts"
+    "admin:create": "tsx scripts/create-super-admin.mts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

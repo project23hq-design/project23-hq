@@ -75,7 +75,7 @@ await db.from("audit_logs").insert({
   action: "platform_role.grant",
   entity_type: "user",
   entity_id: userId,
-  reason: "provisioned via scripts/create-super-admin.ts",
+  reason: "provisioned via scripts/create-super-admin.mts",
   metadata: { role },
 });
 console.info(`\n✔ ${role} granted to ${email}`);

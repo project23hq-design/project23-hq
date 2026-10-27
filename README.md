@@ -34,7 +34,7 @@ supabase/tests/        pgTAP structural security invariants
 tests/integration/     Vitest against real Postgres: concurrency, RLS, payments, refunds, payouts, referrals, jobs
 tests/e2e/             Playwright: acceptance journey, webhooks, access control, mobile/a11y
 docs/                  Product spec, architecture, payments & settlement, operations, progress
-scripts/               create-super-admin.ts (local/staging provisioning)
+scripts/               create-super-admin.mts (local/staging provisioning)
 ```
 
 ## Local setup

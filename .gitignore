@@ -14,3 +14,7 @@ supabase/.temp
 .DS_Store
 test-results
 playwright-report
+
+# Local-only logins (never commit)
+LOCAL-LOGINS.md
+local-admin-authenticator.png
