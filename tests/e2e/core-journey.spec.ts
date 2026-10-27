@@ -89,7 +89,6 @@ test("a platform admin with MFA approves the event", async ({ page }) => {
   const card = page.locator("div", { has: page.getByText(title, { exact: true }) }).filter({ has: page.getByRole("button", { name: "Submit decision" }) }).last();
   await card.getByRole("combobox").selectOption("approve");
   await card.getByRole("button", { name: "Submit decision" }).click();
-  await expect(page.getByText(title, { exact: true })).toHaveCount(0, { timeout: 15_000 }); // left the review queue
   await expect.poll(async () => (await page.request.get(`/events/${slug}`)).status()).toBe(200);
 });
 

@@ -56,7 +56,10 @@ export default async function EventPage({ params }: { params: Params }) {
   const referralActive = (await readReferrals()).some((r) => r.e === e.id);
   const onSale = e.status === "published" && new Date(e.ends_at!) > new Date();
   const range = formatEventRange(e.starts_at!, e.ends_at!, e.timezone!);
-  const place = [e.venue_name, e.address_line, e.city_name, e.region_name].filter(Boolean).join(", ");
+  // Skip city/region when the organizer's address already names them ("Station Road, Osogbo").
+  const place = [e.venue_name, e.address_line, e.city_name, e.region_name]
+    .filter((p, i, all): p is string => !!p && !all.slice(0, i).some((prev) => prev?.toLowerCase().includes(p.toLowerCase())))
+    .join(", ");
   const mapUrl = place ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}` : null;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const priced = tickets.filter((t) => t.price_minor !== null);

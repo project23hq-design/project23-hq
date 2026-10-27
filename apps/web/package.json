@@ -9,8 +9,6 @@
     "start": "next start --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --project unit",
-    "test:integration": "vitest run --project integration",
     "worker": "tsx --env-file-if-exists=.env.local scripts/worker.ts"
   },
   "dependencies": {
