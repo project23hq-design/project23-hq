@@ -21,7 +21,9 @@ export default async function Reports() {
   ]);
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-medium">Reports & referral flags</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">
+        Reports & referral flags
+      </h1>
       <Table>
         <thead>
           <tr>
@@ -64,7 +66,7 @@ export default async function Reports() {
           )}
         </tbody>
       </Table>
-      <h2 className="text-xl font-medium">Referral review flags</h2>
+      <h2 className="text-base font-medium">Referral review flags</h2>
       <p className="text-sm text-fg-muted">
         Heuristic signals (blocked self-referrals, repeated buyer patterns) for human review — not
         automatic penalties.

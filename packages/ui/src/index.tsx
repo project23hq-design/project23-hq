@@ -77,7 +77,7 @@ export function Field({
     : children;
   return (
     <div className={cn("grid gap-1.5", className)}>
-      <label className="text-sm font-medium text-fg" htmlFor={htmlFor}>
+      <label className="text-xs font-medium text-fg-muted" htmlFor={htmlFor}>
         {label}
         {required && (
           <span className="ml-0.5 text-fg-subtle" aria-hidden>
@@ -206,8 +206,14 @@ export function EmptyState({
 // ---------------------------------------------------------------- Data table shell
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06]">
-      <table className={cn("w-full min-w-[640px] border-collapse text-sm", className)} {...props} />
+    <div className="w-full overflow-x-auto rounded-xl border border-white/[0.05] bg-white/[0.02]">
+      <table
+        className={cn(
+          "w-full min-w-[640px] border-collapse text-[13px] [&_tbody_tr:hover]:bg-white/[0.025] [&_tbody_tr:last-child>td]:border-0",
+          className,
+        )}
+        {...props}
+      />
     </div>
   );
 }
@@ -216,7 +222,7 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
     <th
       scope="col"
       className={cn(
-        "border-b border-white/[0.06] px-4 py-3 text-left text-xs font-medium text-fg-muted",
+        "border-b border-white/[0.05] px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-fg-subtle",
         className,
       )}
       {...props}
@@ -226,7 +232,7 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
 export function Td({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={cn("border-b border-white/[0.04] px-4 py-3 align-middle", className)}
+      className={cn("border-b border-white/[0.04] px-4 py-3.5 align-middle", className)}
       {...props}
     />
   );
@@ -242,10 +248,12 @@ export function Stat({
   hint?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.05] bg-white/[0.035] p-4">
+    <div className="rounded-xl border border-white/[0.05] bg-white/[0.035] p-5">
       <p className="text-xs text-fg-muted">{label}</p>
-      <p className="mt-1 font-display text-2xl font-medium tabular-nums">{value}</p>
-      {hint && <p className="mt-1 text-xs text-fg-muted">{hint}</p>}
+      <p className="mt-3 text-2xl font-light leading-none sm:text-[28px] tracking-[-0.02em] tabular-nums">
+        {value}
+      </p>
+      {hint && <p className="mt-2.5 text-xs leading-4 text-fg-subtle">{hint}</p>}
     </div>
   );
 }

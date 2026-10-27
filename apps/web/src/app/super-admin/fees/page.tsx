@@ -40,7 +40,7 @@ export default async function Fees() {
     : null;
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-medium">Fee policies</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Fee policies</h1>
       <Alert title="Precedence & history">
         Event override → organization override → platform default. Policies are versioned and
         insert-only; each order snapshots the policy in effect when it was created, so changes never

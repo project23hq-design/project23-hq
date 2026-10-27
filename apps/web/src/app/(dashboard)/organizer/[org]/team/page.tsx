@@ -35,7 +35,7 @@ export default async function Team({ params }: { params: Promise<{ org: string }
     : ["manager", "scanner"];
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-medium">Team</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Team</h1>
       <Card>
         <CardHeader>
           <CardTitle>Roles</CardTitle>

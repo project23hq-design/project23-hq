@@ -22,7 +22,7 @@ export default async function Jobs() {
   ]);
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-medium">Jobs & delivery</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Jobs & delivery</h1>
       <p className="text-sm text-fg-muted">
         Jobs retry with exponential backoff (30s × 2ⁿ, max 6h) up to 8 attempts, then move to
         dead-letter. Email sends are deduplicated by intent key, so retries never send twice.
@@ -63,7 +63,7 @@ export default async function Jobs() {
           ))}
         </tbody>
       </Table>
-      <h2 className="text-xl font-medium">Failed emails</h2>
+      <h2 className="text-base font-medium">Failed emails</h2>
       <Table>
         <thead>
           <tr>

@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import {
+  AlignLeft,
+  ArrowUpRight,
+  CalendarDays,
+  ChevronLeft,
+  ImageIcon,
+  Plus,
+  ShieldCheck,
+} from "lucide-react";
 import {
   formatBps,
   formatDateTime,
@@ -27,6 +35,8 @@ import {
 import { requireOrg } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { EventPoster } from "@/components/poster";
+import { SectionTitle, TabLinks } from "@/components/dashboard-shell";
+import { StatusDot } from "@/components/workspace-event-row";
 import {
   assignStaffAction,
   decideEnrollmentAction,
@@ -75,11 +85,12 @@ export default async function EventEditor({
   const { supabase, org } = await requireOrg(slug, ["owner", "manager", "finance"]);
   const { data: e } = await supabase
     .from("events")
-    .select("*")
+    .select("*, categories(slug)")
     .eq("id", eventId)
     .eq("organization_id", org.id)
     .maybeSingle();
   if (!e) notFound();
+  const category = (e.categories as unknown as { slug: string } | null)?.slug;
   const editable = org.role !== "finance";
   const locked = ["cancelled", "completed", "archived"].includes(e.status);
   const base = `/organizer/${org.slug}/events/${e.id}`;
@@ -92,37 +103,43 @@ export default async function EventEditor({
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-fg-muted">
-            <Link href={`/organizer/${org.slug}/events`} className="hover:underline">
-              Events
-            </Link>{" "}
-            /
-          </p>
-          <h1 className="text-2xl font-medium sm:text-3xl">{e.title}</h1>
-          <p className="mt-1 text-sm text-fg-muted">
-            {formatEventRange(e.starts_at, e.ends_at, e.timezone)}
+      <Link
+        href={`/organizer/${org.slug}/events`}
+        className="-ml-2 mb-5 inline-flex h-8 items-center gap-1 rounded-full pl-1 pr-3 text-xs font-medium text-fg-muted hover:bg-white/[0.06] hover:text-fg"
+      >
+        <ChevronLeft className="size-4" /> Events
+      </Link>
+      <div className="flex flex-wrap items-center gap-5">
+        <EventPoster
+          slug={e.slug}
+          title={e.title}
+          coverPath={e.cover_path}
+          coverAlt={e.cover_alt}
+          startsAt={e.starts_at}
+          timezone={e.timezone}
+          venue={e.venue_name}
+          category={category}
+          shape="square"
+          rounded="md"
+          sizes="80px"
+          className="w-16 shrink-0 sm:w-20"
+        />
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">{e.title}</h1>
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-fg-muted">
+            <span>{formatEventRange(e.starts_at, e.ends_at, e.timezone)}</span>
+            <StatusDot status={e.status} />
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            tone={
-              e.status === "published" ? "success" : e.status === "cancelled" ? "danger" : "neutral"
-            }
+        {["published", "paused", "completed", "cancelled"].includes(e.status) && (
+          <Link
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white/[0.08] px-4 text-sm font-medium hover:bg-white/[0.12]"
+            href={`/events/${e.slug}`}
+            target="_blank"
           >
-            {e.status.replace("_", " ")}
-          </Badge>
-          {["published", "paused", "completed", "cancelled"].includes(e.status) && (
-            <Link
-              className="inline-flex items-center gap-1 text-sm text-accent"
-              href={`/events/${e.slug}`}
-              target="_blank"
-            >
-              View public page <ExternalLink className="size-3.5" />
-            </Link>
-          )}
-        </div>
+            View public page <ArrowUpRight className="size-4" />
+          </Link>
+        )}
       </div>
       {e.moderation_status === "changes_requested" && (
         <Alert tone="warning" className="mt-4" title="Changes requested by Project23">
@@ -141,23 +158,18 @@ export default async function EventEditor({
         </Alert>
       )}
 
-      <nav
-        aria-label="Event sections"
-        className="scrollbar-none -mx-4 mt-6 flex gap-1 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0"
-      >
-        {TABS.map(([k, label]) => (
-          <Link
-            key={k}
-            href={`${base}?tab=${k}`}
-            aria-current={tab === k ? "page" : undefined}
-            className={`shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium ${tab === k ? "border-accent text-fg" : "border-transparent text-fg-muted hover:text-fg"}`}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <div className="mt-8 border-b border-white/[0.05] pb-3">
+        <TabLinks
+          label="Event sections"
+          links={TABS.map(([k, label]) => ({
+            href: `${base}?tab=${k}`,
+            label,
+            active: tab === k,
+          }))}
+        />
+      </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         {tab === "details" && <DetailsTab />}
         {tab === "tickets" && <TicketsTab />}
         {tab === "promos" && <PromosTab />}
@@ -182,12 +194,13 @@ export default async function EventEditor({
     ]);
     const ev = e!;
     return (
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <Card className="p-6">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div>
           <ActionForm action={updateEventDetailsAction} submitLabel="Save event">
             {hidden}
             <fieldset disabled={!editable || locked} className="grid gap-4">
-              <legend className="mb-2 font-display text-lg font-semibold">Basics</legend>
+              <legend className="sr-only">Event details</legend>
+              <SectionTitle icon={<AlignLeft />}>Basics</SectionTitle>
               <SlugInput title={ev.title} slug={ev.slug} />
               <Field label="Summary" htmlFor="summary">
                 <Input name="summary" defaultValue={ev.summary ?? ""} maxLength={280} />
@@ -217,9 +230,9 @@ export default async function EventEditor({
                   <Input name="tags" defaultValue={ev.tags.join(", ")} />
                 </Field>
               </div>
-              <legend className="mb-2 mt-4 font-display text-lg font-semibold">
-                Schedule & location
-              </legend>
+              <div className="mt-4 border-t border-white/[0.05] pt-8">
+                <SectionTitle icon={<CalendarDays />}>Schedule & location</SectionTitle>
+              </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="Format" htmlFor="format">
                   <Select name="format" defaultValue={ev.format}>
@@ -277,9 +290,9 @@ export default async function EventEditor({
                   rows={3}
                 />
               </Field>
-              <legend className="mb-2 mt-4 font-display text-lg font-semibold">
-                Capacity & policies
-              </legend>
+              <div className="mt-4 border-t border-white/[0.05] pt-8">
+                <SectionTitle icon={<ShieldCheck />}>Capacity & policies</SectionTitle>
+              </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field
                   label="Total capacity (people)"
@@ -342,13 +355,20 @@ export default async function EventEditor({
               </Field>
             </fieldset>
           </ActionForm>
-        </Card>
-        <div className="space-y-3">
+        </div>
+        <div className="space-y-3 lg:sticky lg:top-6 lg:self-start">
+          <SectionTitle icon={<ImageIcon />}>Flyer</SectionTitle>
           <EventPoster
             slug={ev.slug}
             title={ev.title}
             coverPath={ev.cover_path}
             coverAlt={ev.cover_alt}
+            category={category}
+            startsAt={ev.starts_at}
+            timezone={ev.timezone}
+            venue={ev.venue_name}
+            rounded="md"
+            sizes="300px"
           />
           {editable && !locked && <CoverUpload org={org.slug} orgId={org.id} eventId={ev.id} />}
         </div>
@@ -494,38 +514,71 @@ export default async function EventEditor({
       </ActionForm>
     );
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         {types?.map((t) => (
-          <Card key={t.id} className="p-5">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-semibold">
-                {t.name}{" "}
-                <span className="text-fg-muted">
-                  · {t.price_minor === 0 ? "Free" : formatMoney(t.price_minor)}
+          <details
+            key={t.id}
+            className="group rounded-xl border border-white/[0.05] bg-white/[0.035] open:bg-white/[0.02]"
+          >
+            <summary className="flex cursor-pointer list-none items-center gap-4 p-4 [&::-webkit-details-marker]:hidden">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold uppercase tracking-[0.02em]">
+                  {t.name}
+                </p>
+                <p className="mt-0.5 text-xs text-fg-muted">
+                  {t.price_minor === 0 ? "Free" : formatMoney(t.price_minor)}
                   {t.admissions_per_unit > 1 ? ` · admits ${t.admissions_per_unit}` : ""}
-                </span>
-              </h3>
+                  {t.visibility !== "public" ? ` · ${t.visibility.replace("_", " ")}` : ""}
+                  {t.is_active === false ? " · inactive" : ""}
+                </p>
+              </div>
+              <div className="hidden w-36 shrink-0 sm:block">
+                <div className="flex justify-between text-xs tabular-nums text-fg-muted">
+                  <span>Sold</span>
+                  <span>
+                    <span className="text-fg">{t.units_sold}</span> / {t.quantity_total}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div
+                    className="h-full rounded-full bg-zinc-200"
+                    style={{
+                      width: `${t.quantity_total ? Math.min(100, (t.units_sold / t.quantity_total) * 100) : 0}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <span className="inline-flex h-8 items-center rounded-full bg-white/[0.08] px-3.5 text-xs font-medium group-open:bg-white/[0.12]">
+                <span className="group-open:hidden">Edit</span>
+                <span className="hidden group-open:inline">Close</span>
+              </span>
+            </summary>
+            <div className="border-t border-white/[0.05] p-4 sm:p-5">
+              <TicketForm t={t} />
               {editable && t.units_sold === 0 && t.units_held === 0 && (
-                <ActionForm
-                  action={deleteTicketTypeAction}
-                  submitLabel="Delete"
-                  submitVariant="ghost"
-                  inline
-                  confirm="Delete this ticket type?"
-                >
-                  {hidden}
-                  <input type="hidden" name="id" value={t.id} />
-                </ActionForm>
+                <div className="mt-4 border-t border-white/[0.05] pt-4">
+                  <ActionForm
+                    action={deleteTicketTypeAction}
+                    submitLabel="Delete ticket type"
+                    submitVariant="ghost"
+                    inline
+                    confirm="Delete this ticket type?"
+                  >
+                    {hidden}
+                    <input type="hidden" name="id" value={t.id} />
+                  </ActionForm>
+                </div>
               )}
             </div>
-            <TicketForm t={t} />
-          </Card>
+          </details>
         ))}
         {editable && !locked && (
-          <Card className="p-5">
-            <h3 className="mb-3 font-semibold">New ticket type</h3>
-            <TicketForm />
-          </Card>
+          <section className="pt-6">
+            <SectionTitle icon={<Plus />}>New ticket type</SectionTitle>
+            <Card className="p-4 sm:p-5">
+              <TicketForm />
+            </Card>
+          </section>
         )}
       </div>
     );

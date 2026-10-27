@@ -50,7 +50,7 @@ export default async function Finance({ params }: { params: Promise<{ org: strin
   };
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-medium">Finance</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Finance</h1>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat
           label="Pending"

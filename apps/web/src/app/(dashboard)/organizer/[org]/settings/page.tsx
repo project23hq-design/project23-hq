@@ -12,7 +12,7 @@ export default async function Settings({ params }: { params: Promise<{ org: stri
   ]);
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-medium">Settings</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Settings</h1>
       <Card className="p-6">
         <ActionForm action={updateOrganizationAction} submitLabel="Save">
           <input type="hidden" name="org" value={org.slug} />

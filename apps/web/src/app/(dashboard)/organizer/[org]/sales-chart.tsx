@@ -35,11 +35,12 @@ export function SalesChart({
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: "var(--surface-2)" }}
+            cursor={{ fill: "rgba(255,255,255,0.04)" }}
             contentStyle={{
               background: "var(--surface-1)",
               border: "1px solid var(--line)",
-              borderRadius: 12,
+              borderRadius: 10,
+              fontSize: 12,
               color: "var(--fg)",
             }}
             formatter={(v, name, item) =>
@@ -51,7 +52,7 @@ export function SalesChart({
                 : [String(v), String(name)]
             }
           />
-          <Bar dataKey="admissions" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="admissions" fill="var(--accent)" radius={[3, 3, 0, 0]} maxBarSize={14} />
         </BarChart>
       </ResponsiveContainer>
     </div>

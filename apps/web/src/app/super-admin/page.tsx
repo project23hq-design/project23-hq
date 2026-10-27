@@ -51,13 +51,15 @@ export default async function AdminOverview({
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-3xl font-medium">Operations overview</h1>
+        <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">
+          Operations overview
+        </h1>
         <div className="flex gap-1 text-sm">
           {[7, 30, 90].map((d) => (
             <Link
               key={d}
               href={`/super-admin?days=${d}`}
-              className={`rounded-full px-3 py-1 ${d === days ? "bg-surface-3" : "text-fg-muted"}`}
+              className={`inline-flex h-8 items-center rounded-full px-3.5 text-xs font-medium ${d === days ? "bg-white/[0.1] text-fg" : "text-fg-muted hover:text-fg"}`}
             >
               {d}d
             </Link>

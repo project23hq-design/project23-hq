@@ -39,14 +39,14 @@ export default async function AdminFinance() {
   ]);
   return (
     <div className="space-y-10">
-      <h1 className="text-3xl font-medium">Finance</h1>
+      <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Finance</h1>
       <Alert title="Settlement model">
         Buyers pay Project23&apos;s Paystack account. Organizer and promoter balances are ledger
         liabilities settled by approved payouts (Paystack Transfers when available, otherwise manual
         bank transfer with a recorded reference). A request is never shown as paid until confirmed.
       </Alert>
       <section>
-        <h2 className="mb-4 text-xl font-medium">Payout queue</h2>
+        <h2 className="mb-4 text-base font-medium">Payout queue</h2>
         <Table>
           <thead>
             <tr>
@@ -140,7 +140,7 @@ export default async function AdminFinance() {
         </Table>
       </section>
       <section>
-        <h2 className="mb-4 text-xl font-medium">Refunds needing attention</h2>
+        <h2 className="mb-4 text-base font-medium">Refunds needing attention</h2>
         <Table>
           <thead>
             <tr>

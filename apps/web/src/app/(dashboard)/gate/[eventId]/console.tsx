@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import Link from "next/link";
 import {
   CheckCircle2,
   Camera,
@@ -180,22 +179,25 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
     : null;
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="mx-auto max-w-xl px-4 py-6">
+      <div className="mb-6 flex items-end justify-between gap-4">
         <div className="min-w-0">
-          <Link href="/gate" className="text-xs text-fg-muted">
-            ← Events
-          </Link>
-          <h1 className="truncate text-lg font-medium">{event.title}</h1>
+          <p className="text-xs text-fg-muted">Check-in</p>
+          <h1 className="mt-1 truncate text-xl font-medium tracking-[-0.01em]">{event.title}</h1>
         </div>
-        <div className="text-right text-sm tabular-nums" aria-live="polite">
+        <div className="shrink-0 text-right tabular-nums" aria-live="polite">
           {stats ? (
             <>
-              <span className="font-display text-xl font-medium">{stats.checked_in}</span>
-              <span className="text-fg-muted"> / {stats.valid} in</span>
+              <p className="text-[36px] font-light leading-none tracking-[-0.02em]">
+                <span>{stats.checked_in}</span>
+                <span className="text-lg text-fg-muted"> / {stats.valid}</span>
+              </p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.06em] text-fg-subtle">
+                Checked in
+              </p>
             </>
           ) : (
-            "—"
+            <p className="text-[36px] font-light leading-none text-fg-muted">—</p>
           )}
         </div>
       </div>
@@ -210,7 +212,7 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
         <div
           role="status"
           aria-live="assertive"
-          className={`mb-4 flex items-center gap-4 rounded-3xl p-5 ${ui.tone}`}
+          className={`mb-4 flex items-center gap-4 rounded-2xl p-5 ${ui.tone}`}
         >
           {ui.icon}
           <div className="min-w-0">
@@ -252,7 +254,7 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
         )}
 
       <Tabs defaultValue="scan">
-        <TabsList className="mb-4 w-full justify-between">
+        <TabsList className="mb-5 flex w-full [&>*]:flex-1">
           <TabsTrigger value="scan">Scan</TabsTrigger>
           <TabsTrigger value="search">Search</TabsTrigger>
           {event.can_door_sell && <TabsTrigger value="door">Door sale</TabsTrigger>}
@@ -338,7 +340,7 @@ function Scanner({ onCode, paused }: { onCode: (code: string) => void; paused: b
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square overflow-hidden rounded-3xl border border-line bg-black">
+      <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/[0.06] bg-black">
         <video
           ref={video}
           className="size-full object-cover"
@@ -425,7 +427,7 @@ function Lookup({ eventId, onAdmit }: { eventId: string; onAdmit: (id: string) =
         </Button>
       </form>
       {err && <Alert tone="warning">{err}</Alert>}
-      <ul className="divide-y divide-line rounded-2xl border border-line">
+      <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-xl bg-white/[0.035]">
         {rows.map((r) => (
           <li key={r.ticket_id} className="flex items-center justify-between gap-3 p-3">
             <div className="min-w-0">

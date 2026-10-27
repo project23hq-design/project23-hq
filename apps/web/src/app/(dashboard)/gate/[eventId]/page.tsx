@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { WorkspaceTopBar } from "@/components/dashboard-shell";
 import { GateConsole } from "./console";
 
 export const metadata = { title: "Gate scanner", robots: { index: false } };
@@ -24,5 +25,12 @@ export default async function GateEvent({ params }: { params: Promise<{ eventId:
     ev.can_door_sell || ev.can_issue_comps
       ? await supabase.rpc("gate_ticket_types", { p_event: eventId })
       : { data: [] };
-  return <GateConsole event={ev} ticketTypes={types ?? []} />;
+  return (
+    <>
+      <WorkspaceTopBar back={{ href: "/gate", label: "Events" }} />
+      <main id="main">
+        <GateConsole event={ev} ticketTypes={types ?? []} />
+      </main>
+    </>
+  );
 }
