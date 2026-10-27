@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+
+/*
+ * Project23 design tokens.
+ * A restrained near-black canvas lets event artwork carry the colour; one warm accent
+ * ("Osun gold") marks primary actions. All text pairs below meet WCAG AA on --bg/--surface-1.
+ *   fg (#F4F1EA) on bg: 17.6:1 · fg-muted (#B9B4AA) on bg: 9.6:1 · fg-subtle (#8F8A82) on bg: 5.6:1
+ *   accent-fg (#14110B) on accent (#F5A524): 10.1:1
+ */
+:root {
+  --bg: #0b0b0d;
+  --surface-1: #141417;
+  --surface-2: #1c1c21;
+  --surface-3: #27272e;
+  --line: #2a2a31;
+  --line-strong: #3d3d46;
+  --fg: #f4f1ea;
+  --fg-muted: #b9b4aa;
+  --fg-subtle: #8f8a82;
+  --accent: #f5a524;
+  --accent-hover: #ffb84d;
+  --accent-fg: #14110b;
+  --success: #3ccb7f;
+  --warning: #f5c04a;
+  --danger: #ff6b6b;
+  --info: #7cc0ff;
+  --ring: #f5a524;
+  --radius: 1rem;
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --shadow-pop: var(--shadow-pop);
+  --animate-in-fade: in-fade 180ms var(--ease-out);
+  --animate-in-up: in-up 260ms var(--ease-out);
+  --animate-in-right: in-right 260ms var(--ease-out);
+}
+
+@keyframes in-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes in-up { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes in-right { from { transform: translateX(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+
+@layer base {
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  body { @apply bg-bg font-sans text-fg antialiased; text-rendering: optimizeLegibility; }
+  h1, h2, h3, h4 { @apply font-display tracking-tight; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  ::selection { background: color-mix(in oklab, var(--accent) 40%, transparent); }
+  a { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .select-chevron {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b9b4aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+  .prose-event { @apply space-y-3 text-[15px] leading-7 text-fg-muted; }
+  .prose-event a { @apply text-accent underline underline-offset-4; }
+  .prose-event strong { @apply text-fg; }
+  .prose-event ul { @apply list-disc pl-5; }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .skip-link { @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-fg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  body { background: #fff; color: #000; }
+  .no-print { display: none !important; }
+}
