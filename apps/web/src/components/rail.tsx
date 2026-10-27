@@ -10,7 +10,7 @@ export function Rail({ label, children }: { label: string; children: React.React
   return (
     <div className="relative">
       <div ref={ref} role="list" aria-label={label}
-        className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:px-0 lg:scroll-px-0">
+        className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto [contain:paint] scroll-px-4 px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:px-0 lg:scroll-px-0">
         {children}
       </div>
       <div className="pointer-events-none absolute -top-14 right-0 hidden gap-2 lg:flex">

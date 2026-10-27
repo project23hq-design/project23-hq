@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Alert, Button, Field, Input } from "@project23/ui";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
@@ -51,7 +50,9 @@ export function MfaPanel({ currentAal, next, recommended }: { currentAal: string
       {qr && (
         <div className="space-y-2">
           <p className="text-sm text-fg-muted">Scan with Google Authenticator, 1Password, Authy or similar, then enter the 6-digit code.</p>
-          <Image src={qr} alt="Authenticator QR code" width={180} height={180} unoptimized className="rounded-xl bg-white p-2" />
+          {/* Supabase returns an inline SVG data URI; next/image does not accept raw SVG markup. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={qr} alt="Authenticator QR code" width={180} height={180} className="rounded-xl bg-white p-2" />
           {secret && <p className="font-mono text-xs text-fg-subtle">Manual key: {secret}</p>}
         </div>
       )}

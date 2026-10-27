@@ -52,7 +52,7 @@ export default async function HomePage() {
 
       {/* Category shortcuts */}
       <nav aria-label="Categories" className="container-page mt-10">
-        <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+        <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 [contain:paint] sm:mx-0 sm:flex-wrap sm:px-0">
           {c.categories.map((cat) => (
             <li key={cat.slug} className="shrink-0">
               <Link href={`/explore?category=${cat.slug}`} className="inline-flex h-10 items-center rounded-full border border-line bg-surface-1 px-4 text-sm font-medium text-fg-muted hover:border-line-strong hover:text-fg">
@@ -101,7 +101,7 @@ export default async function HomePage() {
           ))}
         </ul>
         {c.osun.length ? (
-          <div className="grid gap-x-8 gap-y-3 md:grid-cols-2">{c.osun.slice(0, 8).map((e) => <EventRow key={e.id} e={e} />)}</div>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-3 md:grid-cols-2">{c.osun.slice(0, 8).map((e) => <EventRow key={e.id} e={e} />)}</div>
         ) : <EmptyState title="Nothing listed in Osun yet">Check back soon, or explore events elsewhere in Nigeria.</EmptyState>}
       </Section>
 

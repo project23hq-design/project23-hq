@@ -41,10 +41,12 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
   const [pending, start] = useTransition();
   const busy = useRef(false);
   const dev = useRef("unknown");
+  const [deviceLabel, setDeviceLabel] = useState("…");
 
   const refreshStats = useCallback(() => { statsAction(event.id).then(setStats).catch(() => undefined); }, [event.id]);
   useEffect(() => {
     dev.current = deviceId();
+    setDeviceLabel(dev.current);
     refreshStats();
     const on = () => setOnline(navigator.onLine);
     on();
@@ -55,6 +57,7 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
   const run = useCallback((fn: () => Promise<ScanResult>) => {
     if (busy.current) return;
     busy.current = true;
+    setResult(null); // never leave a previous green result on screen while a new check runs
     if (!navigator.onLine) { setResult({ result: "error", offline: true }); busy.current = false; return; }
     start(async () => {
       try {
@@ -107,7 +110,7 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
         {event.can_door_sell && <TabsContent value="door"><DoorSale eventId={event.id} types={ticketTypes.filter((t) => t.kind !== "complimentary")} onDone={refreshStats} /></TabsContent>}
         {event.can_issue_comps && <TabsContent value="comp"><Comp eventId={event.id} types={ticketTypes} onDone={refreshStats} /></TabsContent>}
       </Tabs>
-      <p className="mt-6 text-center text-xs text-fg-subtle">Device {dev.current} · every scan is logged with your account and server time.</p>
+      <p className="mt-6 text-center text-xs text-fg-subtle">Device {deviceLabel} · every scan is logged with your account and server time.</p>
     </div>
   );
 }
@@ -153,7 +156,7 @@ function Scanner({ onCode, paused }: { onCode: (code: string) => void; paused: b
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (manual.trim()) { onCode(manual.trim()); setManual(""); } }}>
         <label className="sr-only" htmlFor="manual-code">Ticket code</label>
         <Input id="manual-code" value={manual} onChange={(e) => setManual(e.target.value)} placeholder="Paste/type QR code (P23T.…)" autoComplete="off" />
-        <Button type="submit" variant="secondary">Check</Button>
+        <Button type="submit" variant="secondary" loading={paused}>Check</Button>
       </form>
     </div>
   );

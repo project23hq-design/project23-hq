@@ -46,7 +46,7 @@ export function EventCard({ e, priority, className }: { e: EventCardData; priori
 export function EventRow({ e }: { e: EventCardData }) {
   const price = priceLabel({ min_price_minor: e.min_price_minor, max_price_minor: e.max_price_minor, is_sold_out: !!e.is_sold_out, sales_ended: !!e.sales_ended, status: e.status! }, formatMoney);
   return (
-    <Link href={`/events/${e.slug}`} className="group flex items-center gap-4 rounded-2xl p-2 -mx-2 outline-none hover:bg-surface-1 focus-visible:ring-2 focus-visible:ring-ring">
+    <Link href={`/events/${e.slug}`} className="group flex min-w-0 items-center gap-4 rounded-2xl p-2 -mx-2 outline-none hover:bg-surface-1 focus-visible:ring-2 focus-visible:ring-ring">
       <EventPoster slug={e.slug!} title={e.title!} coverPath={e.cover_path} coverAlt={e.cover_alt} category={e.category_slug}
         variant="square" sizes="112px" className="w-24 shrink-0 sm:w-28 [&_span]:text-[10px]" />
       <div className="min-w-0 space-y-1">

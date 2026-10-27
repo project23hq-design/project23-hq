@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { Lock, Minus, Plus, Tag, Users } from "lucide-react";
 import { availabilityLabel, formatMoney, type TicketAvailability } from "@project23/domain";
@@ -27,7 +27,8 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
   const [open, setOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, startSubmit] = useTransition();
-  const idemKey = useRef<string>("");
+  // A new selection = a new checkout attempt (new idempotency key); resubmits of the same one are deduplicated.
+  const [idemKey, setIdemKey] = useState(() => crypto.randomUUID());
 
   const items = useMemo(
     () => Object.entries(qty).filter(([, q]) => q > 0).map(([ticketTypeId, quantity]) => ({ ticketTypeId, quantity, accessCode: codes[ticketTypeId] })),
@@ -36,11 +37,8 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
   const units = items.reduce((a, i) => a + i.quantity, 0);
   const admissions = items.reduce((a, i) => a + i.quantity * (tickets.find((t) => t.id === i.ticketTypeId)?.admissions_per_unit ?? 1), 0);
 
-  // A new selection = a new checkout attempt (new idempotency key); resubmits of the same one are deduplicated.
-  useEffect(() => { idemKey.current = crypto.randomUUID(); }, [items, promo]);
-
   useEffect(() => {
-    if (items.length === 0) { setQuote(null); return; }
+    if (items.length === 0) return;
     const t = setTimeout(() => startQuote(async () => setQuote(await quoteAction(eventId, items, promo || undefined))), 350);
     return () => clearTimeout(t);
   }, [eventId, items, promo]);
@@ -50,6 +48,7 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
     let v = Math.max(0, Math.min(max, next));
     if (v > 0 && v < t.min_per_order) v = next > (qty[t.id] ?? 0) ? t.min_per_order : 0;
     setQty((q) => ({ ...q, [t.id]: v }));
+    setIdemKey(crypto.randomUUID());
   };
 
   const form = useForm<BuyerForm>({ defaultValues: { name: defaultBuyer?.name ?? "", email: defaultBuyer?.email ?? "", phone: defaultBuyer?.phone ?? "", acceptTerms: false } });
@@ -58,7 +57,7 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
     setServerError(null);
     startSubmit(async () => {
       const res = await createOrderAction({
-        eventId, items, promoCode: promo || undefined, idempotencyKey: idemKey.current,
+        eventId, items, promoCode: promo || undefined, idempotencyKey: idemKey,
         buyer: { name: values.name, email: values.email, phone: values.phone || undefined }, acceptTerms: values.acceptTerms,
       });
       if (res?.fieldErrors) {
@@ -71,13 +70,14 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
     });
   });
 
-  const total = quote?.ok ? quote.total_minor : null;
+  const shown = items.length > 0 ? quote : null;
+  const total = shown?.ok ? shown.total_minor : null;
   const cta = !onSale ? "Not on sale" : units === 0 ? "Select tickets" : total === 0 ? "Get free tickets" : "Continue";
 
   return (
     <div id="tickets" className="scroll-mt-24">
       <h2 className="mb-4 text-xl font-bold">Tickets</h2>
-      {tickets.length === 0 && <p className="text-fg-muted">Tickets haven't been released yet.</p>}
+      {tickets.length === 0 && <p className="text-fg-muted">Tickets haven&apos;t been released yet.</p>}
       <ul className="space-y-3">
         {tickets.map((t) => {
           const q = qty[t.id] ?? 0;
@@ -120,7 +120,7 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
           {promoOpen ? (
             <label className="flex items-center gap-2">
               <Tag className="size-4 text-fg-subtle" aria-hidden /><span className="sr-only">Promo code</span>
-              <Input value={promo} onChange={(e) => setPromo(e.target.value.toUpperCase())} placeholder="Promo code" className="h-10 max-w-56 uppercase" autoComplete="off" maxLength={32} />
+              <Input value={promo} onChange={(e) => { setPromo(e.target.value.toUpperCase()); setIdemKey(crypto.randomUUID()); }} placeholder="Promo code" className="h-10 max-w-56 uppercase" autoComplete="off" maxLength={32} />
             </label>
           ) : (
             <Button variant="link" size="sm" onClick={() => setPromoOpen(true)}>Have a promo code?</Button>
@@ -128,19 +128,19 @@ export function TicketSelector({ eventId, eventTitle, tickets, onSale, defaultBu
         </div>
       )}
 
-      {quote && !quote.ok && units > 0 && <Alert tone="warning" className="mt-4">{quote.error}</Alert>}
+      {shown && !shown.ok && <Alert tone="warning" className="mt-4">{shown.error}</Alert>}
 
       {/* Summary + sticky purchase bar on mobile */}
       <div className="sticky bottom-0 z-30 -mx-4 mt-6 border-t border-line bg-bg/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur sm:static sm:mx-0 sm:rounded-2xl sm:border sm:bg-surface-1 sm:p-4">
-        {quote?.ok && units > 0 && (
+        {shown?.ok && (
           <dl className="mb-3 space-y-1 text-sm">
-            <div className="flex justify-between text-fg-muted"><dt>{units} ticket{units > 1 ? "s" : ""}{admissions !== units ? ` · ${admissions} admissions` : ""}</dt><dd className="tabular-nums">{formatMoney(quote.subtotal_minor)}</dd></div>
-            {quote.discount_minor > 0 && <div className="flex justify-between text-success"><dt>Discount</dt><dd className="tabular-nums">−{formatMoney(quote.discount_minor)}</dd></div>}
-            {quote.buyer_fee_minor > 0 && <div className="flex justify-between text-fg-muted"><dt>Booking fee</dt><dd className="tabular-nums">{formatMoney(quote.buyer_fee_minor)}</dd></div>}
-            <div className="flex justify-between pt-1 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatMoney(quote.total_minor)}</dd></div>
+            <div className="flex justify-between text-fg-muted"><dt>{units} ticket{units > 1 ? "s" : ""}{admissions !== units ? ` · ${admissions} admissions` : ""}</dt><dd className="tabular-nums">{formatMoney(shown.subtotal_minor)}</dd></div>
+            {shown.discount_minor > 0 && <div className="flex justify-between text-success"><dt>Discount</dt><dd className="tabular-nums">−{formatMoney(shown.discount_minor)}</dd></div>}
+            {shown.buyer_fee_minor > 0 && <div className="flex justify-between text-fg-muted"><dt>Booking fee</dt><dd className="tabular-nums">{formatMoney(shown.buyer_fee_minor)}</dd></div>}
+            <div className="flex justify-between pt-1 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatMoney(shown.total_minor)}</dd></div>
           </dl>
         )}
-        <Button size="lg" className="w-full" disabled={!onSale || units === 0 || !quote?.ok} loading={quoting && units > 0} onClick={() => setOpen(true)}>
+        <Button size="lg" className="w-full" disabled={!onSale || units === 0 || !shown?.ok} loading={quoting && units > 0} onClick={() => setOpen(true)}>
           {cta}{total !== null && total > 0 && units > 0 ? ` · ${formatMoney(total)}` : ""}
         </Button>
         {referralActive && <p className="mt-2 text-center text-xs text-fg-subtle">You arrived via a promoter link. This doesn&apos;t change your price.</p>}

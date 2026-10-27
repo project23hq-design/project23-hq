@@ -7,13 +7,15 @@ import { EventPoster } from "@/components/poster";
 
 export const metadata = { title: "My tickets" };
 
+const nowMs = () => Date.now();
+
 export default async function MyTickets() {
   const { supabase } = await requireUser("/account/tickets");
   await supabase.rpc("link_my_orders");
   const { data: orders } = await supabase.from("orders")
     .select("id, public_ref, admissions, status, events!inner(title, slug, starts_at, ends_at, timezone, venue_name, cover_path, category_id)")
     .in("status", ["paid", "partially_refunded"]).order("created_at", { ascending: false }).limit(100);
-  const now = Date.now();
+  const now = nowMs();
   const list = (orders ?? []).map((o) => ({ ...o, ev: o.events as unknown as { title: string; slug: string; starts_at: string; ends_at: string; timezone: string; venue_name: string | null; cover_path: string | null } }));
   const upcoming = list.filter((o) => new Date(o.ev.ends_at).getTime() > now).sort((a, b) => a.ev.starts_at.localeCompare(b.ev.starts_at));
   const past = list.filter((o) => new Date(o.ev.ends_at).getTime() <= now);
