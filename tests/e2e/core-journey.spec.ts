@@ -20,8 +20,15 @@ const adminPassword = `Adm1n-${run}-local-only`;
 let eventId = "";
 let orderId = "";
 
-test("organizer creates an event with Early Bird and Regular tickets and submits it", async ({ page }) => {
-  await signIn(page, "organizer@project23.test", undefined, "/organizer/osun-sound-collective/events/new");
+test("organizer creates an event with Early Bird and Regular tickets and submits it", async ({
+  page,
+}) => {
+  await signIn(
+    page,
+    "organizer@project23.test",
+    undefined,
+    "/organizer/osun-sound-collective/events/new",
+  );
   await page.goto("/organizer/osun-sound-collective/events/new");
   await page.getByLabel("Event title").fill(title);
   await expect(page.getByLabel("Event URL")).toHaveValue(slug);
@@ -30,7 +37,9 @@ test("organizer creates an event with Early Bird and Regular tickets and submits
   await page.waitForURL(/tab=details/);
   eventId = page.url().split("/events/")[1]!.split("?")[0]!;
 
-  await page.getByLabel("Description").fill("An afternoon of live jazz on the grass with food vendors. Bring a mat!");
+  await page
+    .getByLabel("Description")
+    .fill("An afternoon of live jazz on the grass with food vendors. Bring a mat!");
   await page.getByLabel("Venue name").fill("Riverside Lawn (fictional)");
   await page.getByLabel("City", { exact: true }).selectOption({ label: "Osogbo" });
   const d = new Date(Date.now() + 20 * 86400_000).toISOString().slice(0, 10);
@@ -41,8 +50,16 @@ test("organizer creates an event with Early Bird and Regular tickets and submits
   await expect(page.getByText("Event saved.")).toBeVisible();
 
   await page.goto(`/organizer/osun-sound-collective/events/${eventId}?tab=tickets`);
-  const add = async (name: string, kind: string, price: string, qty: string, opensAfter?: string) => {
-    const form = page.locator("form", { has: page.getByRole("button", { name: "Add ticket type" }) });
+  const add = async (
+    name: string,
+    kind: string,
+    price: string,
+    qty: string,
+    opensAfter?: string,
+  ) => {
+    const form = page.locator("form", {
+      has: page.getByRole("button", { name: "Add ticket type" }),
+    });
     await form.getByLabel("Name").fill(name);
     await form.getByLabel("Type").selectOption(kind);
     await form.getByLabel("Price (₦)").fill(price);
@@ -73,31 +90,49 @@ test("a platform admin with MFA approves the event", async ({ page }) => {
     `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
        confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
      values ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated', $1, extensions.crypt($2, extensions.gen_salt('bf')), now(),
-       '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', '') returning id`, [adminEmail, adminPassword]);
-  await q(`insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at, updated_at) values (gen_random_uuid(), $1::uuid, $1::text, jsonb_build_object('sub', $1::text, 'email', $2::text), 'email', now(), now())`, [id, adminEmail]);
+       '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', '') returning id`,
+    [adminEmail, adminPassword],
+  );
+  await q(
+    `insert into auth.identities (id, user_id, provider_id, identity_data, provider, created_at, updated_at) values (gen_random_uuid(), $1::uuid, $1::text, jsonb_build_object('sub', $1::text, 'email', $2::text), 'email', now(), now())`,
+    [id, adminEmail],
+  );
   await q("insert into platform_role_assignments (user_id, role) values ($1, 'super_admin')", [id]);
 
   await signIn(page, adminEmail, adminPassword, "/super-admin");
   await page.goto("/super-admin");
   await expect(page).toHaveURL(/account\/security\?mfa=required/); // role alone is not enough
   await page.getByRole("button", { name: "Set up authenticator app" }).click();
-  const secret = (await page.getByText(/Manual key:/).textContent())!.replace("Manual key:", "").replace(/\s+/g, "");
+  const secret = (await page.getByText(/Manual key:/).textContent())!
+    .replace("Manual key:", "")
+    .replace(/\s+/g, "");
   await page.getByLabel("6-digit code").fill(generateSync({ secret }));
   await page.getByRole("button", { name: "Verify" }).click();
   await page.waitForURL((u) => u.pathname.startsWith("/super-admin"));
   await page.goto("/super-admin/events");
-  const card = page.locator("div", { has: page.getByText(title, { exact: true }) }).filter({ has: page.getByRole("button", { name: "Submit decision" }) }).last();
+  const card = page
+    .locator("div", { has: page.getByText(title, { exact: true }) })
+    .filter({ has: page.getByRole("button", { name: "Submit decision" }) })
+    .last();
   await card.getByRole("combobox").selectOption("approve");
   await card.getByRole("button", { name: "Submit decision" }).click();
   await expect.poll(async () => (await page.request.get(`/events/${slug}`)).status()).toBe(200);
 });
 
-test("a guest discovers the event, buys two Early Bird tickets and gets two unique tickets", async ({ page }) => {
+test("a guest discovers the event, buys two Early Bird tickets and gets two unique tickets", async ({
+  page,
+}) => {
   await page.goto(`/explore?q=${encodeURIComponent("Jazz Picnic")}`);
-  await page.getByRole("link", { name: new RegExp(title) }).first().click();
+  await page
+    .getByRole("link", { name: new RegExp(title) })
+    .first()
+    .click();
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
   await expect(page.getByText("Opens after Early Bird")).toBeVisible(); // Regular is locked behind Early Bird
-  orderId = await buyTickets(page, slug, "Early Bird", 2, { name: "Guest Buyer", email: buyerEmail });
+  orderId = await buyTickets(page, slug, "Early Bird", 2, {
+    name: "Guest Buyer",
+    email: buyerEmail,
+  });
   await expect(page.getByText(/Tickets held for/)).toBeVisible();
   await page.getByRole("button", { name: /Pay ₦10,000 securely/ }).click();
   await expect(page.getByRole("heading", { name: "Test payment" })).toBeVisible();
@@ -110,7 +145,10 @@ test("a guest discovers the event, buys two Early Bird tickets and gets two uniq
   await expect(page.getByRole("button", { name: "Add one Regular", exact: true })).toBeVisible();
 });
 
-test("tickets are emailed once and can be retrieved securely without an account", async ({ page, browser }) => {
+test("tickets are emailed once and can be retrieved securely without an account", async ({
+  page,
+  browser,
+}) => {
   await runWorker(page);
   const mails = capturedEmails(buyerEmail).filter((m) => m.subject.includes(title));
   expect(mails).toHaveLength(1);
@@ -133,7 +171,9 @@ test("tickets are emailed once and can be retrieved securely without an account"
   await sp.getByLabel("Email address").fill(`nobody-${run}@example.com`);
   await sp.getByRole("button", { name: "Email me a link" }).click();
   await expect(sp.getByText(/If we have tickets for that email/)).toBeVisible();
-  const link = /href="([^"]+\/orders\/access\/[^"]+)"/.exec(capturedEmails(buyerEmail).find((m) => m.subject.includes("tickets link"))!.html)![1]!;
+  const link = /href="([^"]+\/orders\/access\/[^"]+)"/.exec(
+    capturedEmails(buyerEmail).find((m) => m.subject.includes("tickets link"))!.html,
+  )![1]!;
   await sp.goto(link.replace(/^https?:\/\/[^/]+/, ""));
   await sp.getByRole("link", { name: new RegExp(title) }).click();
   await expect(sp.getByText("Download all (PDF)")).toBeVisible();
@@ -144,7 +184,10 @@ test("tickets are emailed once and can be retrieved securely without an account"
 });
 
 test("assigned staff admit each ticket exactly once", async ({ page }) => {
-  const tickets = await q<{ id: string; token_version: number }>("select id, token_version from tickets where order_id = $1 order by unit_number", [orderId]);
+  const tickets = await q<{ id: string; token_version: number }>(
+    "select id, token_version from tickets where order_id = $1 order by unit_number",
+    [orderId],
+  );
   await signIn(page, "scanner@project23.test", undefined, "/gate");
   await page.goto("/gate");
   await page.getByRole("link", { name: new RegExp(title) }).click();
@@ -164,11 +207,19 @@ test("assigned staff admit each ticket exactly once", async ({ page }) => {
 });
 
 test("the organizer sees correct sales and net proceeds", async ({ page }) => {
-  await signIn(page, "organizer@project23.test", undefined, `/organizer/osun-sound-collective/events/${eventId}?tab=insights`);
+  await signIn(
+    page,
+    "organizer@project23.test",
+    undefined,
+    `/organizer/osun-sound-collective/events/${eventId}?tab=insights`,
+  );
   await page.goto(`/organizer/osun-sound-collective/events/${eventId}?tab=insights`);
-  const row = (label: string) => page.getByText(label, { exact: true }).locator("xpath=following-sibling::dd[1]");
+  const row = (label: string) =>
+    page.getByText(label, { exact: true }).locator("xpath=following-sibling::dd[1]");
   await expect(row("Ticket sales (before discounts)")).toHaveText("₦10,000");
   await expect(row("Project23 platform fee")).toHaveText("-₦500");
   await expect(row("Net proceeds (before refunds)")).toHaveText("₦9,500");
-  await expect(page.getByText("Checked in", { exact: true }).locator("xpath=following-sibling::p[1]")).toHaveText("2 / 2");
+  await expect(
+    page.getByText("Checked in", { exact: true }).locator("xpath=following-sibling::p[1]"),
+  ).toHaveText("2 / 2");
 });

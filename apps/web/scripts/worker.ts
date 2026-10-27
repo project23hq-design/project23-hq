@@ -21,12 +21,26 @@ if (!secret) {
 async function tick() {
   const started = Date.now();
   try {
-    const res = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(55_000) });
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${secret}` },
+      signal: AbortSignal.timeout(55_000),
+    });
     const body = await res.json().catch(() => ({}));
-    console.info(JSON.stringify({ ts: new Date().toISOString(), msg: "tick", status: res.status, ms: Date.now() - started, ...body }));
+    console.info(
+      JSON.stringify({
+        ts: new Date().toISOString(),
+        msg: "tick",
+        status: res.status,
+        ms: Date.now() - started,
+        ...body,
+      }),
+    );
     return res.ok;
   } catch (e) {
-    console.error(JSON.stringify({ ts: new Date().toISOString(), msg: "tick failed", error: String(e) }));
+    console.error(
+      JSON.stringify({ ts: new Date().toISOString(), msg: "tick failed", error: String(e) }),
+    );
     return false;
   }
 }

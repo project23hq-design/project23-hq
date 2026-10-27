@@ -12,7 +12,11 @@ async function canPay(orderId: string) {
   if (await browserCreatedOrder(orderId)) return true;
   const { user } = await getSession();
   if (!user) return false;
-  const { data } = await adminClient().from("orders").select("buyer_user_id").eq("id", orderId).maybeSingle();
+  const { data } = await adminClient()
+    .from("orders")
+    .select("buyer_user_id")
+    .eq("id", orderId)
+    .maybeSingle();
   return data?.buyer_user_id === user.id;
 }
 
@@ -35,10 +39,18 @@ export async function cancelOrderAction(orderId: string) {
 }
 
 /** Test provider only: simulate the customer's choice on the hosted page, then return like Paystack does. */
-export async function simulateTestPaymentAction(reference: string, outcome: "success" | "failed" | "abandoned") {
-  if (env().APP_ENV === "production" || env().PAYMENT_PROVIDER !== "test") throw new Error("test provider disabled");
+export async function simulateTestPaymentAction(
+  reference: string,
+  outcome: "success" | "failed" | "abandoned",
+) {
+  if (env().APP_ENV === "production" || env().PAYMENT_PROVIDER !== "test")
+    throw new Error("test provider disabled");
   const p = paymentProvider() as TestPaymentProvider;
   await p.simulate(reference, outcome);
-  const { data } = await adminClient().from("payment_attempts").select("order_id").eq("reference", reference).single();
+  const { data } = await adminClient()
+    .from("payment_attempts")
+    .select("order_id")
+    .eq("reference", reference)
+    .single();
   redirect(`/checkout/return?orderId=${data!.order_id}&reference=${encodeURIComponent(reference)}`);
 }

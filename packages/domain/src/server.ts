@@ -23,8 +23,12 @@ export function safeEqual(a: string, b: string): boolean {
  * The database stores only sha256(token). Bumping token_version rotates the credential.
  */
 export function ticketQrToken(ticketId: string, version: number, secret: string): string {
-  if (!secret || secret.length < 32) throw new Error("TICKET_QR_SECRET must be at least 32 characters");
-  const mac = createHmac("sha256", secret).update(`ticket:${ticketId}:${version}`).digest("base64url").slice(0, 32);
+  if (!secret || secret.length < 32)
+    throw new Error("TICKET_QR_SECRET must be at least 32 characters");
+  const mac = createHmac("sha256", secret)
+    .update(`ticket:${ticketId}:${version}`)
+    .digest("base64url")
+    .slice(0, 32);
   return `P23T.${mac}`;
 }
 
@@ -33,7 +37,11 @@ export function ticketQrHash(token: string): string {
 }
 
 /** Paystack webhook signature: HMAC-SHA512 of the raw body with the secret key, hex. */
-export function verifyPaystackSignature(rawBody: string, signature: string | null, secretKey: string): boolean {
+export function verifyPaystackSignature(
+  rawBody: string,
+  signature: string | null,
+  secretKey: string,
+): boolean {
   if (!signature || !secretKey) return false;
   const expected = createHmac("sha512", secretKey).update(rawBody, "utf8").digest("hex");
   return safeEqual(expected, signature.trim());
@@ -66,11 +74,19 @@ export interface ReferralCookie {
 }
 
 /** Last-click-wins: a newer eligible click for the same event replaces the previous one. */
-export function chooseReferral(existing: ReferralCookie | null, incoming: ReferralCookie): ReferralCookie {
+export function chooseReferral(
+  existing: ReferralCookie | null,
+  incoming: ReferralCookie,
+): ReferralCookie {
   if (!existing || existing.e !== incoming.e) return incoming;
   return incoming.t >= existing.t ? incoming : existing;
 }
 
-export function referralWithinWindow(ref: ReferralCookie, eventId: string, windowDays: number, now = Date.now()): boolean {
+export function referralWithinWindow(
+  ref: ReferralCookie,
+  eventId: string,
+  windowDays: number,
+  now = Date.now(),
+): boolean {
   return ref.e === eventId && ref.t <= now && now - ref.t <= windowDays * 86_400_000;
 }

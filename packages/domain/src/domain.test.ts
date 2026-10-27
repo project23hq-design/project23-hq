@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { allocateProportional, applyBps, formatMoney, parseMoneyToMinor, formatBps } from "./money";
 import { computeQuote, proportionalSlice } from "./fees";
-import { normalizeNigerianPhone, priceLabel, slugify, zonedLocalToUtc, utcToZonedLocal } from "./format";
+import {
+  normalizeNigerianPhone,
+  priceLabel,
+  slugify,
+  zonedLocalToUtc,
+  utcToZonedLocal,
+} from "./format";
 import { checkoutSchema } from "./schemas";
 import {
-  chooseReferral, referralWithinWindow, signValue, ticketQrHash, ticketQrToken, verifyPaystackSignature, verifySignedValue,
+  chooseReferral,
+  referralWithinWindow,
+  signValue,
+  ticketQrHash,
+  ticketQrToken,
+  verifyPaystackSignature,
+  verifySignedValue,
 } from "./server";
 import { createHmac } from "node:crypto";
 import { can } from "./permissions";
@@ -89,7 +101,11 @@ describe("order economics", () => {
 
   it("splits proportional refunds so slices sum to the whole", () => {
     const total = 1001;
-    const slices = [proportionalSlice(total, 3, 0, 1), proportionalSlice(total, 3, 1, 1), proportionalSlice(total, 3, 2, 1)];
+    const slices = [
+      proportionalSlice(total, 3, 0, 1),
+      proportionalSlice(total, 3, 1, 1),
+      proportionalSlice(total, 3, 2, 1),
+    ];
     expect(slices.reduce((a, b) => a + b)).toBe(total);
   });
 });
@@ -106,10 +122,18 @@ describe("formatting", () => {
     const f = (m: number) => formatMoney(m);
     const base = { is_sold_out: false, sales_ended: false, status: "published" };
     expect(priceLabel({ ...base, min_price_minor: 0, max_price_minor: 0 }, f)).toBe("Free");
-    expect(priceLabel({ ...base, min_price_minor: 500_000, max_price_minor: 2_000_000 }, f)).toBe("From ₦5,000");
-    expect(priceLabel({ ...base, is_sold_out: true, min_price_minor: 1, max_price_minor: 1 }, f)).toBe("Sold out");
-    expect(priceLabel({ ...base, sales_ended: true, min_price_minor: 1, max_price_minor: 1 }, f)).toBe("Sales ended");
-    expect(priceLabel({ ...base, status: "cancelled", min_price_minor: 1, max_price_minor: 1 }, f)).toBe("Cancelled");
+    expect(priceLabel({ ...base, min_price_minor: 500_000, max_price_minor: 2_000_000 }, f)).toBe(
+      "From ₦5,000",
+    );
+    expect(
+      priceLabel({ ...base, is_sold_out: true, min_price_minor: 1, max_price_minor: 1 }, f),
+    ).toBe("Sold out");
+    expect(
+      priceLabel({ ...base, sales_ended: true, min_price_minor: 1, max_price_minor: 1 }, f),
+    ).toBe("Sales ended");
+    expect(
+      priceLabel({ ...base, status: "cancelled", min_price_minor: 1, max_price_minor: 1 }, f),
+    ).toBe("Cancelled");
   });
 
   it("converts wall-clock event times in Africa/Lagos to UTC and back", () => {
@@ -168,7 +192,10 @@ describe("credentials and signatures", () => {
     const v = signValue({ l: "link", e: "event", t: 1 }, secret);
     expect(verifySignedValue(v, secret)).toEqual({ l: "link", e: "event", t: 1 });
     const [body, mac] = v.split(".");
-    const forged = Buffer.from(JSON.stringify({ l: "other", e: "event", t: 1 })).toString("base64url") + "." + mac;
+    const forged =
+      Buffer.from(JSON.stringify({ l: "other", e: "event", t: 1 })).toString("base64url") +
+      "." +
+      mac;
     expect(verifySignedValue(forged, secret)).toBeNull();
     expect(verifySignedValue(`${body}.x`, secret)).toBeNull();
   });

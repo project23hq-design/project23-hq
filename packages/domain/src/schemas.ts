@@ -11,7 +11,10 @@ const optionalPhone = z
     if (!v) return undefined;
     const n = normalizeNigerianPhone(v);
     if (!n) {
-      ctx.addIssue({ code: "custom", message: "Enter a valid Nigerian phone number (e.g. 0803 123 4567)" });
+      ctx.addIssue({
+        code: "custom",
+        message: "Enter a valid Nigerian phone number (e.g. 0803 123 4567)",
+      });
       return z.NEVER;
     }
     return n;
@@ -20,7 +23,13 @@ const optionalPhone = z
 export const checkoutSchema = z.object({
   eventId: uuid,
   items: z
-    .array(z.object({ ticketTypeId: uuid, quantity: z.coerce.number().int().min(1).max(100), accessCode: z.string().trim().max(64).optional() }))
+    .array(
+      z.object({
+        ticketTypeId: uuid,
+        quantity: z.coerce.number().int().min(1).max(100),
+        accessCode: z.string().trim().max(64).optional(),
+      }),
+    )
     .min(1, "Choose at least one ticket")
     .max(10),
   buyer: z.object({
@@ -36,7 +45,14 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
 export const organizationSchema = z.object({
   name: z.string().trim().min(2).max(120),
-  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])$/, "Use 3–50 lowercase letters, numbers or hyphens"),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(
+      /^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])$/,
+      "Use 3–50 lowercase letters, numbers or hyphens",
+    ),
   description: z.string().trim().max(4000).optional(),
   contactEmail: email.optional(),
   contactPhone: optionalPhone,
@@ -51,7 +67,11 @@ export const attendeeQuestionSchema = z.object({
 
 export const eventBasicsSchema = z.object({
   title: z.string().trim().min(3).max(140),
-  slug: z.string().trim().toLowerCase().regex(/^[a-z0-9](?:[a-z0-9-]{1,98}[a-z0-9])$/, "Use lowercase letters, numbers and hyphens"),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9](?:[a-z0-9-]{1,98}[a-z0-9])$/, "Use lowercase letters, numbers and hyphens"),
   summary: z.string().trim().max(280).optional(),
   descriptionHtml: z.string().max(20000).optional(),
   categoryId: uuid,
@@ -74,14 +94,30 @@ export const eventScheduleSchema = z
     ageRestriction: z.coerce.number().int().min(0).max(25).optional(),
     visibility: z.enum(["public", "unlisted", "private"]),
   })
-  .refine((v) => v.endsLocal > v.startsLocal, { message: "End must be after start", path: ["endsLocal"] })
-  .refine((v) => v.format === "online" || (v.venueName && v.cityId), { message: "Venue and city are required for in-person events", path: ["venueName"] });
+  .refine((v) => v.endsLocal > v.startsLocal, {
+    message: "End must be after start",
+    path: ["endsLocal"],
+  })
+  .refine((v) => v.format === "online" || (v.venueName && v.cityId), {
+    message: "Venue and city are required for in-person events",
+    path: ["venueName"],
+  });
 
 export const ticketTypeSchema = z
   .object({
     id: uuid.optional(),
     name: z.string().trim().min(1).max(80),
-    kind: z.enum(["general", "early_bird", "regular", "vip", "vvip", "student", "group", "free", "complimentary"]),
+    kind: z.enum([
+      "general",
+      "early_bird",
+      "regular",
+      "vip",
+      "vvip",
+      "student",
+      "group",
+      "free",
+      "complimentary",
+    ]),
     description: z.string().trim().max(500).optional(),
     priceMinor: z.coerce.number().int().min(0).max(100_000_000_000),
     quantityTotal: z.coerce.number().int().min(0).max(1_000_000),
@@ -95,12 +131,22 @@ export const ticketTypeSchema = z
     accessCode: z.string().trim().min(4).max(32).optional().or(z.literal("")),
     isActive: z.boolean().default(true),
   })
-  .refine((v) => v.minPerOrder <= v.maxPerOrder, { message: "Min must be ≤ max", path: ["minPerOrder"] })
-  .refine((v) => !["free", "complimentary"].includes(v.kind) || v.priceMinor === 0, { message: "Free tickets must cost ₦0", path: ["priceMinor"] });
+  .refine((v) => v.minPerOrder <= v.maxPerOrder, {
+    message: "Min must be ≤ max",
+    path: ["minPerOrder"],
+  })
+  .refine((v) => !["free", "complimentary"].includes(v.kind) || v.priceMinor === 0, {
+    message: "Free tickets must cost ₦0",
+    path: ["priceMinor"],
+  });
 
 export const promoSchema = z
   .object({
-    code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,32}$/, "3–32 letters, numbers, - or _"),
+    code: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z0-9_-]{3,32}$/, "3–32 letters, numbers, - or _"),
     discountType: z.enum(["percent", "fixed"]),
     percentBps: z.coerce.number().int().min(1).max(10000).optional(),
     amountMinor: z.coerce.number().int().min(1).optional(),
@@ -108,7 +154,10 @@ export const promoSchema = z
     startsLocal: z.string().optional(),
     endsLocal: z.string().optional(),
   })
-  .refine((v) => (v.discountType === "percent" ? !!v.percentBps : !!v.amountMinor), { message: "Enter a discount value", path: ["percentBps"] });
+  .refine((v) => (v.discountType === "percent" ? !!v.percentBps : !!v.amountMinor), {
+    message: "Enter a discount value",
+    path: ["percentBps"],
+  });
 
 export const referralProgramSchema = z.object({
   rateBps: z.coerce.number().int().min(1).max(5000),

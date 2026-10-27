@@ -13,8 +13,20 @@ export default async function OrderPage({ params }: { params: Promise<{ orderId:
   return (
     <div className="container-page max-w-3xl pt-10">
       <h1 className="text-3xl font-bold">{bundle.event?.title ?? "Your order"}</h1>
-      {bundle.event?.status === "cancelled" && <Alert tone="danger" className="mt-4">This event was cancelled. Paid orders are refunded automatically.</Alert>}
-      {bundle.tickets.length > 0 ? <div className="mt-6"><OrderTickets bundle={bundle} /></div> : <p className="mt-4 text-fg-muted">This order has no tickets (status: {bundle.order.status.replace("_", " ")}).</p>}
+      {bundle.event?.status === "cancelled" && (
+        <Alert tone="danger" className="mt-4">
+          This event was cancelled. Paid orders are refunded automatically.
+        </Alert>
+      )}
+      {bundle.tickets.length > 0 ? (
+        <div className="mt-6">
+          <OrderTickets bundle={bundle} />
+        </div>
+      ) : (
+        <p className="mt-4 text-fg-muted">
+          This order has no tickets (status: {bundle.order.status.replace("_", " ")}).
+        </p>
+      )}
     </div>
   );
 }

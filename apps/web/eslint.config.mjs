@@ -5,6 +5,13 @@ const config = [
   ...next,
   ...nextTs,
   { ignores: [".next/**", "next-env.d.ts", "playwright-report/**"] },
-  { rules: { "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }] } },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ];
 export default config;

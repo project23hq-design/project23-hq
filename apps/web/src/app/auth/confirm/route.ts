@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
   const next = safeNext(url.searchParams.get("next"), "/account");
   const supabase = await createClient();
   let ok = false;
-  if (tokenHash && type) ok = !(await supabase.auth.verifyOtp({ type, token_hash: tokenHash })).error;
+  if (tokenHash && type)
+    ok = !(await supabase.auth.verifyOtp({ type, token_hash: tokenHash })).error;
   else if (code) ok = !(await supabase.auth.exchangeCodeForSession(code)).error;
   if (ok) await supabase.rpc("link_my_orders");
   return NextResponse.redirect(new URL(ok ? next : "/sign-in?error=link", url.origin));

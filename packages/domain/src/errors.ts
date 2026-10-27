@@ -28,7 +28,8 @@ export const ENGINE_ERRORS: Record<string, string> = {
   slug_taken: "That URL is already taken — try another.",
   organization_limit: "You've reached the maximum number of organizations.",
   invitation_invalid: "This invitation is invalid or has expired.",
-  invitation_wrong_account: "This invitation was sent to a different email address. Sign in with that address to accept it.",
+  invitation_wrong_account:
+    "This invitation was sent to a different email address. Sign in with that address to accept it.",
   last_owner: "An organization must always have at least one owner.",
   not_a_member: "That person must be a member of your organization first.",
   invalid_transition: "That status change isn't allowed.",
@@ -37,7 +38,8 @@ export const ENGINE_ERRORS: Record<string, string> = {
   reason_required: "Please provide a reason.",
   invalid_decision: "Unknown decision.",
   order_not_refundable: "This order can't be refunded.",
-  refund_policy_disallows: "This event's refund policy doesn't allow refunds now. Contact the organizer.",
+  refund_policy_disallows:
+    "This event's refund policy doesn't allow refunds now. Contact the organizer.",
   units_not_refundable: "Some selected tickets have already been used or refunded.",
   nothing_to_refund: "There is nothing left to refund on this order.",
   refund_stale: "Tickets changed since the request was made. Please create a new request.",
@@ -47,7 +49,8 @@ export const ENGINE_ERRORS: Record<string, string> = {
   below_minimum: "That amount is below the minimum withdrawal.",
   no_verified_recipient: "Add and verify a payout bank account first.",
   insufficient_available_balance: "That's more than your available balance.",
-  recovery_outstanding: "An outstanding reversal must be recovered from future earnings before you can withdraw.",
+  recovery_outstanding:
+    "An outstanding reversal must be recovered from future earnings before you can withdraw.",
   external_reference_required: "Enter the bank transfer reference.",
   rate_out_of_bounds: "That commission rate is outside the allowed range.",
   rate_exceeds_proceeds: "That rate would leave too little of the ticket price for the organizer.",
@@ -66,13 +69,18 @@ export const ENGINE_ERRORS: Record<string, string> = {
   invalid_value: "That value isn't valid.",
 };
 
-export function engineErrorMessage(code: string | undefined | null, fallback = "Something went wrong. Please try again."): string {
+export function engineErrorMessage(
+  code: string | undefined | null,
+  fallback = "Something went wrong. Please try again.",
+): string {
   if (!code) return fallback;
   return ENGINE_ERRORS[code] ?? fallback;
 }
 
 /** Extract an engine code from a PostgREST error ({ message, code: 'P0001' }). */
-export function engineCode(err: { message?: string; code?: string } | null | undefined): string | null {
+export function engineCode(
+  err: { message?: string; code?: string } | null | undefined,
+): string | null {
   if (!err) return null;
   if (err.code === "P0001" && err.message && /^[a-z_]+$/.test(err.message)) return err.message;
   return null;

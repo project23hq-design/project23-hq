@@ -16,14 +16,33 @@ export default async function Settings({ params }: { params: Promise<{ org: stri
       <Card className="p-6">
         <ActionForm action={updateOrganizationAction} submitLabel="Save">
           <input type="hidden" name="org" value={org.slug} />
-          <Field label="Name" htmlFor="name"><Input name="name" defaultValue={o?.name} /></Field>
-          <Field label="Public URL" htmlFor="slug-ro" hint="Contact support to change your URL."><Input id="slug-ro" value={`/organizers/${o?.slug}`} disabled readOnly /></Field>
-          <Field label="About" htmlFor="description"><Textarea name="description" defaultValue={o?.description ?? ""} /></Field>
+          <Field label="Name" htmlFor="name">
+            <Input name="name" defaultValue={o?.name} />
+          </Field>
+          <Field label="Public URL" htmlFor="slug-ro" hint="Contact support to change your URL.">
+            <Input id="slug-ro" value={`/organizers/${o?.slug}`} disabled readOnly />
+          </Field>
+          <Field label="About" htmlFor="description">
+            <Textarea name="description" defaultValue={o?.description ?? ""} />
+          </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Contact email" htmlFor="contactEmail"><Input name="contactEmail" type="email" defaultValue={o?.contact_email ?? ""} /></Field>
-            <Field label="Contact phone" htmlFor="contactPhone"><Input name="contactPhone" defaultValue={o?.contact_phone ?? ""} /></Field>
+            <Field label="Contact email" htmlFor="contactEmail">
+              <Input name="contactEmail" type="email" defaultValue={o?.contact_email ?? ""} />
+            </Field>
+            <Field label="Contact phone" htmlFor="contactPhone">
+              <Input name="contactPhone" defaultValue={o?.contact_phone ?? ""} />
+            </Field>
           </div>
-          <Field label="City" htmlFor="cityId"><Select name="cityId" defaultValue={o?.city_id ?? ""}><option value="">—</option>{cities?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></Field>
+          <Field label="City" htmlFor="cityId">
+            <Select name="cityId" defaultValue={o?.city_id ?? ""}>
+              <option value="">—</option>
+              {cities?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
         </ActionForm>
       </Card>
     </div>

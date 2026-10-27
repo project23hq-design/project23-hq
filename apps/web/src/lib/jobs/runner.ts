@@ -16,7 +16,10 @@ export async function runTick(opts: { batch?: number; worker?: string } = {}) {
   const { data: maintenance, error: mErr } = await db.rpc("run_maintenance");
   if (mErr) log.error("maintenance failed", { error: mErr.message });
 
-  const { data: jobs, error } = await db.rpc("jobs_claim", { p_worker: worker, p_limit: opts.batch ?? 20 });
+  const { data: jobs, error } = await db.rpc("jobs_claim", {
+    p_worker: worker,
+    p_limit: opts.batch ?? 20,
+  });
   if (error) throw error;
   let ok = 0;
   let failed = 0;

@@ -5,7 +5,9 @@ test.describe("mobile and accessibility", () => {
     await page.goto("/");
     await page.keyboard.press("Tab");
     await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
     expect(overflow).toBeLessThanOrEqual(1);
   });
 
@@ -27,7 +29,10 @@ test.describe("mobile and accessibility", () => {
     await page.getByLabel("City").selectOption("ile-ife");
     await expect(page).toHaveURL(/city=ile-ife/);
     await expect(page.getByRole("heading", { name: "Events in Ile-Ife" })).toBeVisible();
-    await page.getByRole("link", { name: /Ife Tech/ }).first().click();
+    await page
+      .getByRole("link", { name: /Ife Tech/ })
+      .first()
+      .click();
     await page.waitForURL(/\/events\//);
     await page.goBack();
     await expect(page).toHaveURL(/city=ile-ife/);

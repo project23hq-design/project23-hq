@@ -23,8 +23,15 @@ export async function requireUser(next = "/account") {
 }
 
 export interface OrgContext {
-  id: string; slug: string; name: string; role: OrgRole; is_first_party: boolean;
-  approval_status: string; verification_status: string; payout_status: string; status: string;
+  id: string;
+  slug: string;
+  name: string;
+  role: OrgRole;
+  is_first_party: boolean;
+  approval_status: string;
+  verification_status: string;
+  payout_status: string;
+  status: string;
 }
 
 export const getMyOrganizations = cache(async (): Promise<OrgContext[]> => {
@@ -32,11 +39,16 @@ export const getMyOrganizations = cache(async (): Promise<OrgContext[]> => {
   if (!user) return [];
   const { data } = await supabase
     .from("memberships")
-    .select("role, organizations(id, slug, name, is_first_party, approval_status, verification_status, payout_status, status)")
+    .select(
+      "role, organizations(id, slug, name, is_first_party, approval_status, verification_status, payout_status, status)",
+    )
     .eq("user_id", user.id);
   return (data ?? [])
     .filter((m) => m.organizations)
-    .map((m) => ({ ...(m.organizations as unknown as Omit<OrgContext, "role">), role: m.role as OrgRole }))
+    .map((m) => ({
+      ...(m.organizations as unknown as Omit<OrgContext, "role">),
+      role: m.role as OrgRole,
+    }))
     .sort((a, b) => a.name.localeCompare(b.name));
 });
 
@@ -61,6 +73,7 @@ export async function requirePlatformAdmin() {
 
 /** Validate a post-auth redirect target: internal paths only. */
 export function safeNext(next: string | null | undefined, fallback = "/account"): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return fallback;
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\"))
+    return fallback;
   return next;
 }

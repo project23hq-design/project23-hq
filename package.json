@@ -2,7 +2,9 @@
   "name": "project23",
   "private": true,
   "packageManager": "pnpm@10.30.3",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "pnpm --filter @project23/web dev",
     "build": "pnpm --filter @project23/web build",
@@ -36,6 +38,11 @@
     "typescript": "5.9.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["supabase", "esbuild", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "supabase",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

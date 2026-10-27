@@ -19,19 +19,47 @@ export async function loadOrderForViewer(orderId: string) {
   }
   if (!order) {
     const { data } = await adminClient().from("orders").select("*").eq("id", orderId).maybeSingle();
-    if (data && ((await browserCreatedOrder(orderId)) || (await guestCanAccessOrder(data)))) order = data;
+    if (data && ((await browserCreatedOrder(orderId)) || (await guestCanAccessOrder(data))))
+      order = data;
   }
   if (!order) return null;
   const db = adminClient(); // access already established above
-  const [{ data: items }, { data: tickets }, { data: event }, { data: attempts }] = await Promise.all([
-    db.from("order_items").select("*").eq("order_id", order.id),
-    db.from("tickets").select("id, public_ref, order_item_id, unit_number, admission_number, status, token_version, attendee_name, first_checked_in_at").eq("order_id", order.id).order("unit_number").order("admission_number"),
-    db.from("public_events").select("id, slug, title, starts_at, ends_at, timezone, venue_name, address_line, city_name, cover_path, category_slug, organization_name, format, status").eq("id", order.event_id).maybeSingle(),
-    db.from("payment_attempts").select("status, created_at").eq("order_id", order.id).order("created_at", { ascending: false }).limit(1),
-  ]);
-  return { order, items: items ?? [], tickets: tickets ?? [], event, lastAttempt: attempts?.[0] ?? null };
+  const [{ data: items }, { data: tickets }, { data: event }, { data: attempts }] =
+    await Promise.all([
+      db.from("order_items").select("*").eq("order_id", order.id),
+      db
+        .from("tickets")
+        .select(
+          "id, public_ref, order_item_id, unit_number, admission_number, status, token_version, attendee_name, first_checked_in_at",
+        )
+        .eq("order_id", order.id)
+        .order("unit_number")
+        .order("admission_number"),
+      db
+        .from("public_events")
+        .select(
+          "id, slug, title, starts_at, ends_at, timezone, venue_name, address_line, city_name, cover_path, category_slug, organization_name, format, status",
+        )
+        .eq("id", order.event_id)
+        .maybeSingle(),
+      db
+        .from("payment_attempts")
+        .select("status, created_at")
+        .eq("order_id", order.id)
+        .order("created_at", { ascending: false })
+        .limit(1),
+    ]);
+  return {
+    order,
+    items: items ?? [],
+    tickets: tickets ?? [],
+    event,
+    lastAttempt: attempts?.[0] ?? null,
+  };
 }
 
 export async function ticketQrs(tickets: { id: string; token_version: number; status: string }[]) {
-  return Promise.all(tickets.map(async (t) => (t.status === "valid" ? qrDataUrl(qrTokenFor(t)) : null)));
+  return Promise.all(
+    tickets.map(async (t) => (t.status === "valid" ? qrDataUrl(qrTokenFor(t)) : null)),
+  );
 }

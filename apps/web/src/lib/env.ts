@@ -25,18 +25,45 @@ const schema = z
   })
   .superRefine((v, ctx) => {
     if (v.PAYMENT_PROVIDER === "paystack" && !v.PAYSTACK_SECRET_KEY?.startsWith("sk_")) {
-      ctx.addIssue({ code: "custom", path: ["PAYSTACK_SECRET_KEY"], message: "Required when PAYMENT_PROVIDER=paystack" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["PAYSTACK_SECRET_KEY"],
+        message: "Required when PAYMENT_PROVIDER=paystack",
+      });
     }
     if (v.PAYMENT_PROVIDER === "test" && !v.TEST_PROVIDER_SECRET) {
-      ctx.addIssue({ code: "custom", path: ["TEST_PROVIDER_SECRET"], message: "Required when PAYMENT_PROVIDER=test" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["TEST_PROVIDER_SECRET"],
+        message: "Required when PAYMENT_PROVIDER=test",
+      });
     }
     if (v.EMAIL_PROVIDER === "resend" && !v.RESEND_API_KEY) {
-      ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "Required when EMAIL_PROVIDER=resend" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["RESEND_API_KEY"],
+        message: "Required when EMAIL_PROVIDER=resend",
+      });
     }
     if (v.APP_ENV === "production") {
-      if (v.PAYMENT_PROVIDER === "test") ctx.addIssue({ code: "custom", path: ["PAYMENT_PROVIDER"], message: "The test payment provider is disabled in production" });
-      if (v.EMAIL_PROVIDER === "capture") ctx.addIssue({ code: "custom", path: ["EMAIL_PROVIDER"], message: "Captured email is disabled in production" });
-      if (!v.NEXT_PUBLIC_APP_URL.startsWith("https://")) ctx.addIssue({ code: "custom", path: ["NEXT_PUBLIC_APP_URL"], message: "Production must use https" });
+      if (v.PAYMENT_PROVIDER === "test")
+        ctx.addIssue({
+          code: "custom",
+          path: ["PAYMENT_PROVIDER"],
+          message: "The test payment provider is disabled in production",
+        });
+      if (v.EMAIL_PROVIDER === "capture")
+        ctx.addIssue({
+          code: "custom",
+          path: ["EMAIL_PROVIDER"],
+          message: "Captured email is disabled in production",
+        });
+      if (!v.NEXT_PUBLIC_APP_URL.startsWith("https://"))
+        ctx.addIssue({
+          code: "custom",
+          path: ["NEXT_PUBLIC_APP_URL"],
+          message: "Production must use https",
+        });
     }
   });
 

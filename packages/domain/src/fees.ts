@@ -59,11 +59,14 @@ export function computeQuote(
   }));
 
   if (opts.promo) {
-    const eligible = lines.map((l) => (l.promoEligible !== false && l.lineSubtotalMinor > 0 ? l.lineSubtotalMinor : 0));
+    const eligible = lines.map((l) =>
+      l.promoEligible !== false && l.lineSubtotalMinor > 0 ? l.lineSubtotalMinor : 0,
+    );
     if (opts.promo.type === "percent") {
       const bps = opts.promo.bps;
       lines.forEach((l, i) => {
-        if (eligible[i]! > 0) l.discountMinor = Math.min(l.lineSubtotalMinor, applyBps(l.lineSubtotalMinor, bps));
+        if (eligible[i]! > 0)
+          l.discountMinor = Math.min(l.lineSubtotalMinor, applyBps(l.lineSubtotalMinor, bps));
       });
     } else {
       const parts = allocateProportional(opts.promo.amountMinor, eligible);
@@ -76,10 +79,14 @@ export function computeQuote(
     if (l.lineNetMinor > 0) {
       l.platformFeeMinor = Math.min(
         l.lineNetMinor,
-        applyBps(l.lineNetMinor, policy.platformFeeBps) + policy.platformFixedMinor * l.quantity * l.admissionsPerUnit,
+        applyBps(l.lineNetMinor, policy.platformFeeBps) +
+          policy.platformFixedMinor * l.quantity * l.admissionsPerUnit,
       );
       if (opts.promoterRateBps && l.commissionEligible !== false) {
-        l.commissionMinor = Math.min(applyBps(l.lineNetMinor, opts.promoterRateBps), l.lineNetMinor - l.platformFeeMinor);
+        l.commissionMinor = Math.min(
+          applyBps(l.lineNetMinor, opts.promoterRateBps),
+          l.lineNetMinor - l.platformFeeMinor,
+        );
       }
     }
     l.organizerNetMinor = l.lineNetMinor - l.platformFeeMinor - l.commissionMinor;
@@ -90,7 +97,9 @@ export function computeQuote(
   const discountMinor = sum("discountMinor");
   const net = subtotalMinor - discountMinor;
   const buyerFeeMinor =
-    opts.chargeBuyerFee !== false && net > 0 ? applyBps(net, policy.buyerFeeBps) + policy.buyerFixedMinor : 0;
+    opts.chargeBuyerFee !== false && net > 0
+      ? applyBps(net, policy.buyerFeeBps) + policy.buyerFixedMinor
+      : 0;
   return {
     lines,
     subtotalMinor,
@@ -104,6 +113,14 @@ export function computeQuote(
 }
 
 /** Proportional reversal for refunding `units` after `alreadyRefunded` (matches refund_request_create). */
-export function proportionalSlice(totalMinor: number, quantity: number, alreadyRefunded: number, units: number): number {
-  return Math.floor((totalMinor * (alreadyRefunded + units)) / quantity) - Math.floor((totalMinor * alreadyRefunded) / quantity);
+export function proportionalSlice(
+  totalMinor: number,
+  quantity: number,
+  alreadyRefunded: number,
+  units: number,
+): number {
+  return (
+    Math.floor((totalMinor * (alreadyRefunded + units)) / quantity) -
+    Math.floor((totalMinor * alreadyRefunded) / quantity)
+  );
 }

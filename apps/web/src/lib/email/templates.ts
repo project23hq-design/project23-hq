@@ -2,10 +2,19 @@ import "server-only";
 
 /** Minimal responsive, branded email layout (tables + inline styles for client support). */
 function esc(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 }
 
-export function layout(opts: { preheader: string; title: string; body: string; cta?: { label: string; url: string }; footer?: string }) {
+export function layout(opts: {
+  preheader: string;
+  title: string;
+  body: string;
+  cta?: { label: string; url: string };
+  footer?: string;
+}) {
   const cta = opts.cta
     ? `<tr><td style="padding:8px 0 24px"><a href="${esc(opts.cta.url)}" style="display:inline-block;background:#f5a524;color:#111;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:999px">${esc(opts.cta.label)}</a></td></tr>`
     : "";

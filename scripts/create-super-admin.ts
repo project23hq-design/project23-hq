@@ -18,31 +18,68 @@ if (existsSync(envFile)) {
     if (m && !process.env[m[1]!]) process.env[m[1]!] = m[2]!.replace(/^"|"$/g, "");
   }
 }
-const arg = (k: string) => { const i = process.argv.indexOf(`--${k}`); return i > -1 ? process.argv[i + 1] : undefined; };
+const arg = (k: string) => {
+  const i = process.argv.indexOf(`--${k}`);
+  return i > -1 ? process.argv[i + 1] : undefined;
+};
 const email = arg("email")?.toLowerCase();
 const role = (arg("role") ?? "super_admin") as "super_admin" | "support" | "finance_admin";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { console.error("Usage: pnpm admin:create --email you@example.com [--role super_admin]"); process.exit(1); }
-if (!url || !key) { console.error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required"); process.exit(1); }
+if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+  console.error("Usage: pnpm admin:create --email you@example.com [--role super_admin]");
+  process.exit(1);
+}
+if (!url || !key) {
+  console.error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
+  process.exit(1);
+}
 const local = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(url);
-if (!local && !process.argv.includes("--allow-remote")) { console.error(`Refusing to provision an admin on non-local ${url}. Pass --allow-remote deliberately (staging only).`); process.exit(1); }
+if (!local && !process.argv.includes("--allow-remote")) {
+  console.error(
+    `Refusing to provision an admin on non-local ${url}. Pass --allow-remote deliberately (staging only).`,
+  );
+  process.exit(1);
+}
 
 const db = createClient(url, key, { auth: { persistSession: false } });
 const password = randomBytes(18).toString("base64url");
 let userId: string | undefined;
-const { data: created, error } = await db.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: "Platform Admin" } });
+const { data: created, error } = await db.auth.admin.createUser({
+  email,
+  password,
+  email_confirm: true,
+  user_metadata: { full_name: "Platform Admin" },
+});
 if (error) {
   const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
   userId = list.users.find((u) => u.email?.toLowerCase() === email)?.id;
-  if (!userId) { console.error(error.message); process.exit(1); }
+  if (!userId) {
+    console.error(error.message);
+    process.exit(1);
+  }
   console.info("User already exists; granting role only (password unchanged).");
 } else {
   userId = created.user.id;
 }
-const { error: rErr } = await db.from("platform_role_assignments").upsert({ user_id: userId, role, revoked_at: null });
-if (rErr) { console.error(rErr.message); process.exit(1); }
-await db.from("audit_logs").insert({ actor_kind: "system", action: "platform_role.grant", entity_type: "user", entity_id: userId, reason: "provisioned via scripts/create-super-admin.ts", metadata: { role } });
+const { error: rErr } = await db
+  .from("platform_role_assignments")
+  .upsert({ user_id: userId, role, revoked_at: null });
+if (rErr) {
+  console.error(rErr.message);
+  process.exit(1);
+}
+await db.from("audit_logs").insert({
+  actor_kind: "system",
+  action: "platform_role.grant",
+  entity_type: "user",
+  entity_id: userId,
+  reason: "provisioned via scripts/create-super-admin.ts",
+  metadata: { role },
+});
 console.info(`\n✔ ${role} granted to ${email}`);
-if (!error) console.info(`  One-time password: ${password}\n  Sign in, then enrol an authenticator app at /account/security before opening /super-admin.`);
+if (!error)
+  console.info(
+    `  One-time password: ${password}\n  Sign in, then enrol an authenticator app at /account/security before opening /super-admin.`,
+  );
