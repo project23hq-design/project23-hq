@@ -1,4 +1,5 @@
 import "server-only";
+import { env } from "@/lib/env";
 
 /** Minimal responsive, branded email layout (tables + inline styles for client support). */
 function esc(s: string) {
@@ -16,14 +17,14 @@ export function layout(opts: {
   footer?: string;
 }) {
   const cta = opts.cta
-    ? `<tr><td style="padding:8px 0 24px"><a href="${esc(opts.cta.url)}" style="display:inline-block;background:#f5a524;color:#111;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:999px">${esc(opts.cta.label)}</a></td></tr>`
+    ? `<tr><td style="padding:8px 0 24px"><a href="${esc(opts.cta.url)}" style="display:inline-block;background:#09090b;color:#fafafa;font-weight:600;text-decoration:none;padding:14px 22px;border-radius:999px">${esc(opts.cta.label)}</a></td></tr>`
     : "";
   return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>${esc(opts.title)}</title></head>
 <body style="margin:0;background:#f4f2ee;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#141414">
 <span style="display:none;max-height:0;overflow:hidden">${esc(opts.preheader)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:20px;overflow:hidden">
-<tr><td style="background:#0c0c0e;padding:20px 28px"><span style="color:#f5a524;font-weight:800;letter-spacing:.08em;font-size:15px">PROJECT23</span></td></tr>
+<tr><td style="background:#0c0c0e;padding:20px 28px"><img src="${esc(env().NEXT_PUBLIC_APP_URL)}/brand/project23-logo.png" alt="Project23" width="120" height="44" style="display:block;border:0;height:44px;width:auto"></td></tr>
 <tr><td style="padding:28px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td style="font-size:22px;font-weight:700;line-height:1.3;padding-bottom:12px">${esc(opts.title)}</td></tr>

@@ -71,7 +71,7 @@ The worker drives the scheduler: it calls `POST /api/jobs/tick` every 15 seconds
 
 ### Test accounts (local seed only)
 
-All seed accounts use the password `Project23-local-only!`. They exist only in your local database.
+All seed accounts use the password `Letmein1!`. They exist only in your local database.
 
 | Email | Role |
 | --- | --- |

@@ -43,7 +43,7 @@ export interface ExploreFilters {
   page?: number;
 }
 
-export const PAGE_SIZE = 16;
+export const PAGE_SIZE = 20;
 
 function windowFor(when: ExploreFilters["when"]): { from: string; to?: string } {
   const now = new Date();

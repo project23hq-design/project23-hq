@@ -3,16 +3,7 @@ import { Menu } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@project23/ui";
 import { getSession } from "@/lib/auth";
 import { HeaderNav } from "./header-nav";
-
-export function Wordmark({ className }: { className?: string }) {
-  return (
-    <span
-      className={`font-display text-[19px] font-semibold tracking-[-0.03em] ${className ?? ""}`}
-    >
-      project23
-    </span>
-  );
-}
+import { Wordmark } from "./wordmark";
 
 /** 64px transparent header: wordmark left, 12px text links + "Create event" pill right. */
 export async function SiteHeader() {
@@ -25,13 +16,13 @@ export async function SiteHeader() {
   ];
   return (
     <header className="no-print relative z-40">
-      <div className="mx-auto flex h-16 max-w-[1120px] items-center px-4 sm:px-8">
+      <div className="flex h-16 items-center px-4 md:px-10">
         <Link
           href="/"
           aria-label="Project23 home"
           className="rounded focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Wordmark />
+          <Wordmark priority />
         </Link>
         <nav aria-label="Main" className="ml-auto hidden items-center md:flex">
           <HeaderNav links={links} />
@@ -89,8 +80,8 @@ export function SiteFooter() {
   ];
   return (
     <footer className="no-print mt-32 border-t border-white/[0.05]">
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-8 text-xs text-fg-muted sm:flex-row sm:items-center sm:px-8">
-        <Wordmark className="text-sm text-fg" />
+      <div className="flex flex-col gap-4 px-4 py-8 text-xs text-fg-muted sm:flex-row sm:items-center md:px-10">
+        <Wordmark className="h-6" />
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">
           {links.map(([href, label]) => (
             <Link key={href} href={href!} className="hover:text-fg">

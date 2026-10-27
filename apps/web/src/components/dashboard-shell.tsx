@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, ChevronLeft } from "lucide-react";
 import { cn } from "@project23/ui";
-import { Wordmark } from "./site-header";
+import { Wordmark } from "./wordmark";
 import { PillNav, SideNav, type NavLink } from "./side-nav";
 
 /**
@@ -29,9 +29,9 @@ export function DashboardShell({
         <Link
           href="/"
           aria-label="Project23 home"
-          className="mb-5 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="mb-5 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Wordmark />
+          <Wordmark className="h-9" />
         </Link>
         {context && <div className="mb-5">{context}</div>}
         <SideNav links={links} label={label} />
@@ -44,7 +44,7 @@ export function DashboardShell({
       <header className="no-print sticky top-0 z-30 border-b border-white/[0.05] bg-bg/90 backdrop-blur lg:hidden">
         <div className="flex h-14 items-center gap-3 px-4">
           <Link href="/" aria-label="Project23 home">
-            <Wordmark className="text-[17px]" />
+            <Wordmark className="h-7" />
           </Link>
           <div className="ml-auto flex min-w-0 items-center gap-2">{context}</div>
         </div>
@@ -78,7 +78,7 @@ export function WorkspaceTopBar({
           </Link>
         ) : (
           <Link href="/" aria-label="Project23 home">
-            <Wordmark className="text-[17px]" />
+            <Wordmark className="h-7" />
           </Link>
         )}
         <div className="ml-auto flex min-w-0 items-center gap-1">

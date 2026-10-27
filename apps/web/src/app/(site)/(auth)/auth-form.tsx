@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { Alert } from "@project23/ui";
+import { Wordmark } from "@/components/wordmark";
 
 type Action = (
   s: { error?: string; message?: string } | undefined,
@@ -37,7 +38,7 @@ export function AuthForm({
   return (
     <div className="flex min-h-[70dvh] items-center justify-center px-4 py-16">
       <div className="w-full max-w-[325px] text-center">
-        <p className="font-display text-3xl font-semibold tracking-[-0.04em]">project23</p>
+        <Wordmark className="mx-auto h-14" priority />
         <h1 className="mt-5 text-lg font-medium">{titles[mode]}</h1>
         {state?.message ? (
           <Alert tone="success" className="mt-6 text-left">

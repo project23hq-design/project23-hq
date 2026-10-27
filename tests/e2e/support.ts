@@ -11,7 +11,7 @@ export const env: Record<string, string> = Object.fromEntries(
     .filter(Boolean)
     .map((m) => [m![1]!, m![2]!.replace(/^"|"$/g, "")]),
 );
-export const PASSWORD = "Project23-local-only!";
+export const PASSWORD = "Letmein1!";
 export const db = new pg.Pool({
   connectionString:
     process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:55322/postgres",

@@ -46,7 +46,7 @@ export async function ExploreView({ sp }: { sp: SP }) {
         ? "Events"
         : "Upcoming events";
   return (
-    <div className="mx-auto max-w-[1120px] px-4 pb-10 pt-4 sm:px-8">
+    <div className="px-4 pb-10 pt-4 md:px-10">
       <h1 className="sr-only">Discover events in Osun and across Nigeria</h1>
       {home && home.featured.length > 0 && <FeaturedCarousel events={home.featured} />}
 
@@ -60,7 +60,7 @@ export async function ExploreView({ sp }: { sp: SP }) {
               View all
             </Link>
           </div>
-          <div className="hidden grid-cols-3 gap-x-6 gap-y-24 md:grid lg:grid-cols-4">
+          <div className="hidden grid-cols-4 gap-x-6 gap-y-24 md:grid 2xl:grid-cols-5">
             {home.project23.slice(0, 4).map((e) => (
               <EventCard key={e.id} e={e} />
             ))}
@@ -137,7 +137,7 @@ async function Results({ filters, sp }: { filters: F; sp: SP }) {
   more.set("page", String(r.page + 1));
   return (
     <>
-      <div className="hidden grid-cols-3 gap-x-6 gap-y-24 md:grid lg:grid-cols-4">
+      <div className="hidden grid-cols-4 gap-x-6 gap-y-24 md:grid 2xl:grid-cols-5">
         {r.events.map((e, i) => (
           <EventCard key={e.id} e={e} priority={i < 4} />
         ))}
@@ -164,8 +164,8 @@ async function Results({ filters, sp }: { filters: F; sp: SP }) {
 
 function GridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-x-6 gap-y-24 md:grid-cols-3 lg:grid-cols-4" aria-busy>
-      {Array.from({ length: 8 }).map((_, i) => (
+    <div className="grid grid-cols-1 gap-x-6 gap-y-24 md:grid-cols-4 2xl:grid-cols-5" aria-busy>
+      {Array.from({ length: 10 }).map((_, i) => (
         <div key={i}>
           <Skeleton className="aspect-[4/5]" />
           <Skeleton className="mt-4 h-3 w-1/2" />
