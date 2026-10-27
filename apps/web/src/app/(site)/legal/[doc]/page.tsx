@@ -53,7 +53,7 @@ const DOCS: Record<string, { title: string; body: [string, string][] }> = {
     body: [
       [
         "Approval and verification",
-        "New organizers are reviewed before publishing. Public verification and payout eligibility are separate checks.",
+        "Anyone can create an organization and start building events straight away. Events are reviewed before they go live. Public verification and payout eligibility are separate checks.",
       ],
       [
         "Fees",

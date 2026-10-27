@@ -28,6 +28,7 @@ export default async function AdminOrgs({
         <Input name="q" defaultValue={q} placeholder="Search name or slug" className="max-w-sm" />
       </form>
       <p className="text-sm text-fg-muted">
+        New organizations are approved automatically; set approval to rejected to block one.
         Approval, public verification and payout eligibility are independent. Suspension stops new
         sales and publishing; existing tickets, orders and financial records are untouched.
       </p>

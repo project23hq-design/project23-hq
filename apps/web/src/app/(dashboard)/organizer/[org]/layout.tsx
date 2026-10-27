@@ -64,7 +64,6 @@ export default async function OrgLayout({
     .map((n) => ({ href: n.href, label: n.label, icon: n.icon, exact: n.exact }));
   const status = [
     org.is_first_party && "First-party",
-    org.approval_status === "approved" ? "Approved" : `Approval ${org.approval_status}`,
     org.verification_status === "verified" && "Verified",
   ].filter(Boolean);
   return (
@@ -90,10 +89,10 @@ export default async function OrgLayout({
           support.
         </Alert>
       )}
-      {org.approval_status === "pending" && (
-        <Alert tone="info" className="mb-6" title="Awaiting approval">
-          You can build events now. Project23 reviews new organizers before the first event goes
-          live.
+      {org.approval_status === "rejected" && (
+        <Alert tone="danger" className="mb-6" title="This organization has been blocked">
+          Project23 has blocked this organization from publishing. Contact support if you think this
+          is a mistake.
         </Alert>
       )}
       {children}

@@ -21,6 +21,30 @@ afterAll(() => pool.end());
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
 describe("row level security and privilege boundaries", () => {
+  it("approves a new organization immediately but never lets it verify itself", async () => {
+    const owner = randomUUID();
+    await admin(
+      `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+      values ('00000000-0000-0000-0000-000000000000', $1, 'authenticated', 'authenticated', $2, '', now(), '{}', '{}', now(), now())`,
+      [owner, `neworg-${owner.slice(0, 6)}@example.com`],
+    );
+    const slug = `new-org-${owner.slice(0, 8)}`;
+    await as(user(owner), "select public.create_organization($1, $2)", ["New Org", slug]);
+    const [org] = await admin<{ approval_status: string; verification_status: string }>(
+      "select approval_status, verification_status from organizations where slug = $1",
+      [slug],
+    );
+    expect(org).toEqual({ approval_status: "approved", verification_status: "unverified" });
+    await expectError(
+      as(
+        user(owner),
+        "insert into organizations (slug, name, verification_status, created_by) values ($1, 'X', 'verified', $2)",
+        [`${slug}-2`, owner],
+      ),
+      /platform-controlled|permission denied/,
+    );
+  });
+
   it("hides base tables from anonymous visitors but exposes the safe public projection", async () => {
     await expectError(as(anon, "select * from events limit 1"), /permission denied/);
     await expectError(as(anon, "select * from orders limit 1"), /permission denied/);

@@ -15,7 +15,7 @@ export default async function NewOrg() {
       <main id="main" className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         <PageHeader
           title="Create your organization"
-          description="This is your public organizer profile. Project23 reviews new organizers before their first event goes live; payouts are enabled separately after bank and business verification."
+          description="This is your public organizer profile. It's ready to use as soon as you create it; payouts switch on after bank and business verification."
           className="mb-0"
         />
         {!user.email_confirmed_at && (

@@ -106,9 +106,9 @@ insert into public.organizations (id, slug, name, description, contact_email, co
    '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000003',
    false, 'approved', 'unverified', 'not_ready', '00000000-0000-4000-8000-000000000001'),
   ('20000000-0000-4000-8000-000000000005', 'pending-promotions', 'Pending Promotions Ltd',
-   'A newly registered (fictional) organizer awaiting approval.', 'new@pending.example', null,
+   'A newly registered (fictional) organizer.', 'new@pending.example', null,
    '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000004',
-   false, 'pending', 'unverified', 'not_ready', '00000000-0000-4000-8000-000000000006');
+   false, 'approved', 'unverified', 'not_ready', '00000000-0000-4000-8000-000000000006');
 
 insert into public.memberships (organization_id, user_id, role) values
   ('20000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000005', 'owner'),

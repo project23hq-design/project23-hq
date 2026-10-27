@@ -42,7 +42,7 @@ Platform roles (`super_admin`, `finance_admin`, `support`) live in `platform_rol
 
 ## 4. Organizer lifecycle
 
-`approval_status` (pending/approved/rejected), `verification_status` (public badge), `payout_status` (not_ready/pending_review/eligible/suspended) and `status` (active/suspended) are independent, platform-controlled fields (guard trigger). Suspension hides the organizer's events from discovery and blocks checkout, publishing, invitations and new referral programs; existing tickets stay valid and financial records are untouched.
+`approval_status` (approved on creation; admins may set `rejected` to block), `verification_status` (public badge), `payout_status` (not_ready/pending_review/eligible/suspended) and `status` (active/suspended) are independent, platform-controlled fields (guard trigger). Suspension hides the organizer's events from discovery and blocks checkout, publishing, invitations and new referral programs; existing tickets stay valid and financial records are untouched.
 
 ## 5. Event lifecycle
 
