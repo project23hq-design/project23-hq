@@ -86,7 +86,7 @@ export function WorkspaceEventRow({ e, href }: { e: WorkspaceEvent; href: string
           </span>
         </div>
         <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.08]">
-          <div className="h-full rounded-full bg-zinc-200" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-brand-strong" style={{ width: `${pct}%` }} />
         </div>
       </div>
       <div className="hidden w-28 shrink-0 sm:block">

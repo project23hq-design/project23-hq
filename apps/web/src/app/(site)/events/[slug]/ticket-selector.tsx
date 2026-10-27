@@ -30,7 +30,7 @@ interface BuyerForm {
 }
 
 /**
- * Sticky "Buy tickets from ₦…" pill (tinted from the flyer) that opens the ticket picker:
+ * Sticky lime "Buy tickets from ₦…" pill that opens the ticket picker:
  * flyer + details | ticket rows | running total + Checkout — then a details step. Prices,
  * availability and totals always come from the server.
  */
@@ -40,7 +40,6 @@ export function TicketSelector({
   venueLine,
   dateLine,
   poster,
-  tint,
   tickets,
   onSale,
   defaultBuyer,
@@ -52,7 +51,6 @@ export function TicketSelector({
   venueLine: string;
   dateLine: string;
   poster: React.ReactNode;
-  tint: string;
   tickets: SelectorTicket[];
   onSale: boolean;
   fromLabel: string;
@@ -149,8 +147,7 @@ export function TicketSelector({
         <DialogPrimitive.Trigger asChild>
           <button
             disabled={!onSale || tickets.length === 0}
-            style={{ backgroundColor: tint }}
-            className="h-12 w-full max-w-[450px] rounded-full px-10 text-base font-medium text-white shadow-[0_8px_30px_rgba(0,0,0,0.45)] transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-70"
+            className="h-12 w-full max-w-[450px] rounded-full bg-accent px-10 text-base font-semibold text-accent-fg shadow-[0_10px_40px_-10px_rgba(172,224,20,0.55)] transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:bg-white/[0.1] disabled:text-fg-muted disabled:shadow-none"
           >
             {onSale ? fromLabel : tickets.length === 0 ? "Tickets coming soon" : "Not on sale"}
           </button>
@@ -254,7 +251,7 @@ export function TicketSelector({
                                 type="button"
                                 onClick={() => set(t, 1)}
                                 aria-label={`Add one ${t.name}`}
-                                className="inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-white text-black hover:bg-zinc-200"
+                                className="inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-brand-strong text-white hover:bg-brand"
                               >
                                 <Plus className="size-4" />
                               </button>
@@ -283,7 +280,7 @@ export function TicketSelector({
                                   onClick={() => set(t, q + 1)}
                                   disabled={q >= t.max_per_order}
                                   aria-label={`Add one ${t.name}`}
-                                  className="inline-flex size-7 items-center justify-center rounded-md bg-white text-black hover:bg-zinc-200 disabled:opacity-40"
+                                  className="inline-flex size-7 items-center justify-center rounded-md bg-brand-strong text-white hover:bg-brand disabled:opacity-40"
                                 >
                                   <Plus className="size-4" />
                                 </button>
@@ -453,7 +450,7 @@ export function TicketSelector({
                   type="button"
                   disabled={units === 0 || !shown?.ok || quoting}
                   onClick={() => setStep("details")}
-                  className="h-10 rounded-full bg-zinc-200 px-6 text-sm font-medium text-black hover:bg-white disabled:opacity-40 md:self-end"
+                  className="h-10 rounded-full bg-accent px-6 text-sm font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-40 md:self-end"
                 >
                   {quoting && units > 0 ? "Updating…" : "Checkout"}
                 </button>
@@ -463,7 +460,7 @@ export function TicketSelector({
                   type="submit"
                   form="buyer-form"
                   disabled={submitting}
-                  className="h-10 whitespace-nowrap rounded-full bg-zinc-200 px-6 text-sm font-medium text-black hover:bg-white disabled:opacity-60 md:self-end"
+                  className="h-10 whitespace-nowrap rounded-full bg-accent px-6 text-sm font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-60 md:self-end"
                 >
                   {submitting
                     ? "Holding your tickets…"

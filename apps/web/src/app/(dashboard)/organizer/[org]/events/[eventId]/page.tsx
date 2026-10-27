@@ -531,7 +531,7 @@ export default async function EventEditor({
                 </div>
                 <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.08]">
                   <div
-                    className="h-full rounded-full bg-zinc-200"
+                    className="h-full rounded-full bg-brand-strong"
                     style={{
                       width: `${t.quantity_total ? Math.min(100, (t.units_sold / t.quantity_total) * 100) : 0}%`,
                     }}
@@ -1017,7 +1017,7 @@ export default async function EventEditor({
         </Table>
         <p className="text-sm text-fg-muted">
           Need someone new?{" "}
-          <Link className="text-accent" href={`/organizer/${org.slug}/team`}>
+          <Link className="text-brand" href={`/organizer/${org.slug}/team`}>
             Invite them as event staff
           </Link>
           .
@@ -1055,7 +1055,7 @@ export default async function EventEditor({
             {tickets?.filter((t) => t.first_checked_in_at && t.status === "valid").length ?? 0}{" "}
             checked in
           </p>
-          <a className="text-sm text-accent" href={`/api/organizer/events/${e!.id}/attendees.csv`}>
+          <a className="text-sm text-brand" href={`/api/organizer/events/${e!.id}/attendees.csv`}>
             Export CSV
           </a>
         </div>

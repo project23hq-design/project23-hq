@@ -40,7 +40,7 @@ export default async function OrganizerHome() {
                   href={`/organizer/${o.slug}`}
                   className="group flex items-center gap-4 rounded-xl bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.07]"
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-200 font-semibold text-black">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand-strong font-semibold text-white">
                     {o.name.charAt(0).toUpperCase()}
                   </span>
                   <span className="min-w-0 flex-1">

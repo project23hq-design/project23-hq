@@ -243,7 +243,7 @@ export default async function PromoterPage() {
                   {p.enrollment_mode === "open" ? "instant approval" : "organizer approval"}
                 </p>
                 <details className="mt-3">
-                  <summary className="cursor-pointer text-sm text-accent">
+                  <summary className="cursor-pointer text-sm text-brand">
                     Read terms & apply
                   </summary>
                   <p className="my-3 whitespace-pre-wrap text-sm text-fg-muted">{p.terms_text}</p>
@@ -309,7 +309,7 @@ export default async function PromoterPage() {
               </Field>
             </ActionForm>
             <details>
-              <summary className="cursor-pointer text-sm text-accent">
+              <summary className="cursor-pointer text-sm text-brand">
                 {recipient ? "Change bank account" : "Add bank account"}
               </summary>
               <ActionForm

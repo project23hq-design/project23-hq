@@ -101,7 +101,7 @@ export default async function Finance({ params }: { params: Promise<{ org: strin
             )}
             {org.role === "owner" ? (
               <details>
-                <summary className="cursor-pointer text-sm text-accent">
+                <summary className="cursor-pointer text-sm text-brand">
                   {recipient ? "Change bank account" : "Add bank account"}
                 </summary>
                 <Alert tone="warning" className="my-3">

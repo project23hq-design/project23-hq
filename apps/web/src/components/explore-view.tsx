@@ -10,6 +10,7 @@ import {
 import { EventCard, EventRow } from "./event-card";
 import { ExploreFilters } from "./filters";
 import { FeaturedCarousel } from "./featured-carousel";
+import { CountPill } from "./count-pill";
 
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -54,7 +55,7 @@ export async function ExploreView({ sp }: { sp: SP }) {
         <section aria-labelledby="p23-h" className="mt-20">
           <div className="mb-6 flex items-center justify-between">
             <h2 id="p23-h" className="text-base font-normal">
-              Project23 Events <span className="text-fg-muted">{home.project23.length}</span>
+              Project23 Events <CountPill>{home.project23.length}</CountPill>
             </h2>
             <Link href="/project23" className="text-xs font-medium text-fg-muted hover:text-fg">
               View all
@@ -102,7 +103,7 @@ async function ListHeading({ heading, filters }: { heading: string; filters: F }
   const { total } = await exploreEvents({ ...filters, page: 1 });
   return (
     <h2 id="list-h" className="text-base font-normal">
-      {heading} <span className="text-fg-muted">{total > 100 ? "100+" : total}</span>
+      {heading} <CountPill>{total > 100 ? "100+" : total}</CountPill>
     </h2>
   );
 }

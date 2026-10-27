@@ -64,7 +64,7 @@ export default async function AdminOrders({
           placeholder="Order ref or buyer email"
           className="max-w-sm"
         />
-        <a className="self-center text-sm text-accent" href="/api/admin/export/orders.csv">
+        <a className="self-center text-sm text-brand" href="/api/admin/export/orders.csv">
           Export orders CSV
         </a>
       </form>

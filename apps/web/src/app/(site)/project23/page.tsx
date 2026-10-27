@@ -23,7 +23,7 @@ export default async function Project23Events() {
     .order("starts_at");
   return (
     <div className="container-page pt-10">
-      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
         <Sparkles className="size-3.5" aria-hidden />
         Official
       </p>

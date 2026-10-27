@@ -22,7 +22,7 @@ export function OrganizerMark({
       <span className="truncate">{name}</span>
       {(firstParty || verified) && (
         <BadgeCheck
-          className="size-3.5 shrink-0 fill-fg-muted text-bg"
+          className="size-3.5 shrink-0 fill-brand-strong text-bg"
           aria-label={firstParty ? "Official Project23 event" : "Verified organizer"}
         />
       )}
@@ -82,7 +82,7 @@ export function EventCard({
       <EventPoster
         {...posterProps(e)}
         priority={priority}
-        className="transition-opacity duration-200 group-hover:opacity-90"
+        className="transition duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_18px_40px_-18px_rgba(98,116,252,0.7)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
       />
       <div className="mt-4 min-w-0">
         <OrganizerMark

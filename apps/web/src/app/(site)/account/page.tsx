@@ -49,7 +49,7 @@ export default async function AccountPage() {
                 {o.name} <span className="text-fg-subtle">· {o.role}</span>
               </Link>
             ))}
-            <Link href="/organizer/new" className="block px-3 py-2 font-medium text-accent">
+            <Link href="/organizer/new" className="block px-3 py-2 font-medium text-brand">
               + Create an organization
             </Link>
           </CardContent>
@@ -60,7 +60,7 @@ export default async function AccountPage() {
           </CardHeader>
           <CardContent className="text-sm text-fg-muted">
             Share events you love and earn commission on verified ticket sales.{" "}
-            <Link className="text-accent" href="/promoter">
+            <Link className="text-brand" href="/promoter">
               Open promoter dashboard
             </Link>
           </CardContent>

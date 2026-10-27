@@ -394,18 +394,3 @@ function Flyer(p: PosterProps) {
     </div>
   );
 }
-
-/** Muted per-event tint for the purchase pill (the reference derives it from the flyer's colours). */
-export function posterTint(slug: string, category?: string | null): string {
-  const byCat: Record<string, number> = {
-    comedy: 45,
-    "food-drink": 4,
-    community: 226,
-    "arts-culture": 160,
-    conferences: 210,
-    workshops: 20,
-    campus: 150,
-  };
-  const h = byCat[category ?? ""] ?? [330, 190, 85, 25][hash(slug) % 4]!;
-  return `hsl(${h} 24% 42%)`;
-}

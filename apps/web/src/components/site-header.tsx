@@ -28,7 +28,7 @@ export async function SiteHeader() {
           <HeaderNav links={links} />
           <Link
             href="/organizer"
-            className="ml-3 inline-flex h-8 items-center rounded-full bg-[#27272a] px-3 text-xs font-medium text-fg hover:bg-[#3f3f46]"
+            className="ml-3 inline-flex h-8 items-center rounded-full bg-accent px-3.5 text-xs font-semibold text-accent-fg hover:bg-accent-hover"
           >
             Create event
           </Link>

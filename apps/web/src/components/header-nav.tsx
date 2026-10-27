@@ -17,7 +17,7 @@ export function HeaderNav({ links }: { links: { href: string; label: string }[] 
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium transition-colors ${active ? "text-fg" : "text-fg-muted hover:text-fg"}`}
+            className={`inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium transition-colors ${active ? "relative text-fg after:absolute after:bottom-0 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-accent" : "text-fg-muted hover:text-fg"}`}
           >
             {l.label}
           </Link>

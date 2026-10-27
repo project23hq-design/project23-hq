@@ -107,7 +107,7 @@ function Radio({
           checked ? "border-fg" : "border-white/25",
         )}
       >
-        {checked && <span className="size-1.5 rounded-full bg-fg" />}
+        {checked && <span className="size-1.5 rounded-full bg-brand" />}
       </span>
       {label}
     </button>
@@ -137,7 +137,7 @@ function RadioPill({
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
-        className={cn(pill, value && "bg-white/[0.08]")}
+        className={cn(pill, value && "bg-brand-soft text-brand")}
         aria-label={`${name}: ${label}`}
       >
         {label}
@@ -183,7 +183,7 @@ function CityPill({
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
-        className={cn(pill, value && "bg-white/[0.08]")}
+        className={cn(pill, value && "bg-brand-soft text-brand")}
         aria-label={`Location: ${label}`}
       >
         {label}

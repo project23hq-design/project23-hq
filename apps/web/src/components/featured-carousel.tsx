@@ -7,6 +7,7 @@ import { formatCardDate } from "@project23/domain";
 import type { EventCardData } from "@/lib/queries";
 import { EventPoster } from "./poster";
 import { OrganizerMark, cardPrice, posterProps } from "./event-card";
+import { CountPill } from "./count-pill";
 
 const GAP = 16;
 const SMALL_RATIO = 202 / 312; // following flyers are 202px when the active one is 312px
@@ -152,8 +153,20 @@ export function FeaturedCarousel({
     drag.current = null;
   };
 
+  const current = mod(base, n);
+  const dots = n > 1 && (
+    <div className="flex items-center gap-1.5" aria-hidden>
+      {events.map((e, k) => (
+        <span
+          key={e.id}
+          className={`h-1.5 rounded-full transition-all duration-500 ${k === current ? "w-5 bg-accent" : "w-1.5 bg-white/20"}`}
+        />
+      ))}
+    </div>
+  );
   const arrows = n > 1 && (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-2">
+      <span className="mr-2 hidden sm:block">{dots}</span>
       <button
         onClick={() => go(-1)}
         aria-label="Previous featured event"
@@ -179,13 +192,13 @@ export function FeaturedCarousel({
         style={{ paddingLeft: geo.pad, paddingRight: geo.pad }}
       >
         <h2 id="featured-h" className="text-base font-normal">
-          {title} <span className="text-fg-muted">{n}</span>
+          {title} <CountPill>{n}</CountPill>
         </h2>
         <div className="sm:hidden">{arrows}</div>
       </div>
       <div
         ref={viewport}
-        className="relative cursor-grab touch-pan-y select-none overflow-hidden transition-opacity duration-300 active:cursor-grabbing"
+        className="relative cursor-grab touch-pan-y select-none overflow-clip transition-opacity duration-300 active:cursor-grabbing"
         style={{ height: posterH, opacity: measured ? 1 : 0 }}
         onPointerDown={onPointerDown}
         onClickCapture={onClickCapture}

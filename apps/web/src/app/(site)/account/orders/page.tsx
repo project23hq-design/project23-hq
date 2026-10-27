@@ -35,7 +35,7 @@ export default async function OrdersPage() {
               <tr key={o.id}>
                 <Td>
                   <Link
-                    className="font-mono text-accent hover:underline"
+                    className="font-mono text-brand hover:underline"
                     href={`/account/orders/${o.id}`}
                   >
                     {o.public_ref}

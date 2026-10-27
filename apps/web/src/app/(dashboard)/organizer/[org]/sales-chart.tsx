@@ -52,7 +52,12 @@ export function SalesChart({
                 : [String(v), String(name)]
             }
           />
-          <Bar dataKey="admissions" fill="var(--accent)" radius={[3, 3, 0, 0]} maxBarSize={14} />
+          <Bar
+            dataKey="admissions"
+            fill="var(--brand-strong)"
+            radius={[3, 3, 0, 0]}
+            maxBarSize={14}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

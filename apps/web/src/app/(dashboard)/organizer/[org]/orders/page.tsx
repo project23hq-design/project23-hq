@@ -154,7 +154,7 @@ export default async function OrgOrders({
                   {(["paid", "partially_refunded"].includes(o.status) && org.role !== "finance") ||
                   ["paid", "partially_refunded"].includes(o.status) ? (
                     <details className="text-sm">
-                      <summary className="cursor-pointer text-accent">Refund</summary>
+                      <summary className="cursor-pointer text-brand">Refund</summary>
                       <ActionForm
                         action={organizerRefundAction}
                         submitLabel="Refund now"

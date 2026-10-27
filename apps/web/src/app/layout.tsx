@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className="no-print border-b border-white/[0.06] bg-[#111113] px-4 py-1.5 text-center text-[11px] text-fg-muted"
           >
             <span
-              className="mr-1.5 inline-block size-1.5 rounded-full bg-warning align-middle"
+              className="mr-1.5 inline-block size-1.5 rounded-full bg-accent align-middle"
               aria-hidden
             />
             Demo mode · test payments and captured emails — no real money moves

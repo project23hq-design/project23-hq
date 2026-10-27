@@ -52,9 +52,12 @@ export default async function OrganizerProfile({ params }: { params: P }) {
           <h1 className="flex items-center gap-2 text-3xl font-medium">
             {org.name}
             {org.is_first_party ? (
-              <Sparkles className="size-5 text-accent" aria-label="Official Project23 organizer" />
+              <Sparkles className="size-5 text-brand" aria-label="Official Project23 organizer" />
             ) : org.is_verified ? (
-              <BadgeCheck className="size-5 text-info" aria-label="Verified organizer" />
+              <BadgeCheck
+                className="size-5 fill-brand-strong text-bg"
+                aria-label="Verified organizer"
+              />
             ) : null}
           </h1>
           {org.is_verified && !org.is_first_party && (

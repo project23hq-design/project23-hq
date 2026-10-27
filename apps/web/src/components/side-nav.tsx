@@ -23,7 +23,7 @@ export function SideNav({ links, label }: { links: NavLink[]; label: string }) {
             className={cn(
               "flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium transition-colors [&_svg]:size-4 [&_svg]:shrink-0",
               active
-                ? "bg-white/[0.08] text-fg"
+                ? "bg-brand-soft text-fg [&_svg]:text-brand"
                 : "text-fg-muted hover:bg-white/[0.04] hover:text-fg",
             )}
           >
@@ -53,7 +53,7 @@ export function PillNav({ links, label }: { links: NavLink[]; label: string }) {
             aria-current={active ? "page" : undefined}
             className={cn(
               "inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-colors",
-              active ? "bg-zinc-200 text-black" : "bg-white/[0.06] text-fg-muted hover:text-fg",
+              active ? "bg-accent text-accent-fg" : "bg-white/[0.06] text-fg-muted hover:text-fg",
             )}
           >
             {l.label}

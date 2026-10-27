@@ -27,7 +27,7 @@ export function OrgSwitcher({
         aria-label={`Organization: ${me?.name ?? current}`}
         className="flex w-full min-w-0 items-center gap-2.5 rounded-lg p-1.5 text-left hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:px-2"
       >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-200 text-sm font-semibold text-black">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-strong text-sm font-semibold text-white">
           {initial(me?.name ?? current)}
         </span>
         <span className="hidden min-w-0 flex-1 sm:block">

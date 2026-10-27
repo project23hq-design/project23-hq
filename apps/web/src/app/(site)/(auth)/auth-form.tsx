@@ -118,7 +118,7 @@ export function AuthForm({
             <button
               type="submit"
               disabled={pending}
-              className="mt-3 h-9 rounded-full bg-zinc-300 text-sm font-medium text-black hover:bg-white disabled:opacity-60"
+              className="mt-3 h-9 rounded-full bg-accent text-sm font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-60"
             >
               {pending ? "Please wait…" : cta}
             </button>

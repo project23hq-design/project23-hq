@@ -71,10 +71,7 @@ export async function OrderTickets({ bundle }: { bundle: Bundle }) {
                   </div>
                 )}
                 <p className="font-mono text-sm">{t.public_ref}</p>
-                <a
-                  href={`/api/tickets/${t.id}/pdf`}
-                  className="text-sm text-accent hover:underline"
-                >
+                <a href={`/api/tickets/${t.id}/pdf`} className="text-sm text-brand hover:underline">
                   Download PDF
                 </a>
               </div>

@@ -9,7 +9,7 @@ import { getSession } from "@/lib/auth";
 import { readReferrals } from "@/lib/security";
 import { createClient } from "@/lib/supabase/server";
 import { publicStorageUrl } from "@/lib/supabase/storage";
-import { EventPoster, posterTint } from "@/components/poster";
+import { EventPoster } from "@/components/poster";
 import { TicketSelector, type SelectorTicket } from "./ticket-selector";
 import { FavoriteButton, ShareButton, ViewBeacon } from "./client-bits";
 
@@ -129,7 +129,6 @@ export default async function EventPage({ params }: { params: Params }) {
     tags: e.tags,
   };
   const coverUrl = publicStorageUrl(e.cover_path);
-  const tint = posterTint(e.slug!, e.category_slug);
 
   const jsonLd =
     e.visibility === "public"
@@ -230,7 +229,7 @@ export default async function EventPage({ params }: { params: Params }) {
               </span>
               {(e.is_first_party || e.organization_verified) && (
                 <BadgeCheck
-                  className="size-4 shrink-0 fill-fg text-bg"
+                  className="size-4 shrink-0 fill-brand-strong text-bg"
                   aria-label={e.is_first_party ? "Official Project23 event" : "Verified organizer"}
                 />
               )}
@@ -330,7 +329,7 @@ export default async function EventPage({ params }: { params: Params }) {
                 <span className="text-fg-muted">Hosted by</span>
                 <span className="ml-1.5 font-medium uppercase">{org.name}</span>
                 {(org.is_verified || org.is_first_party) && (
-                  <BadgeCheck className="ml-1 size-4 fill-fg text-bg" aria-hidden />
+                  <BadgeCheck className="ml-1 size-4 fill-brand-strong text-bg" aria-hidden />
                 )}
                 <Link
                   href={`/organizers/${org.slug}`}
@@ -396,7 +395,6 @@ export default async function EventPage({ params }: { params: Params }) {
         eventTitle={e.title!}
         venueLine={venue}
         dateLine={dateLine}
-        tint={tint}
         fromLabel={fromLabel}
         poster={<EventPoster {...poster} sizes="160px" />}
         onSale={onSale}

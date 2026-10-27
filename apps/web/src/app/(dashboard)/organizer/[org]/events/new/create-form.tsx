@@ -510,7 +510,7 @@ export function CreateEventForm({
           <button
             onClick={submit}
             disabled={pending || !title.trim() || !categoryId}
-            className="h-10 w-full rounded-full bg-[#3f3f46] text-base font-medium text-fg hover:bg-[#52525b] disabled:opacity-50"
+            className="h-10 w-full rounded-full bg-accent text-base font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
           >
             {pending ? "Creating…" : "Create Event"}
           </button>

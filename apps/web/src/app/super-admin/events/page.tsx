@@ -29,7 +29,7 @@ export default async function AdminEvents({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Events</h1>
         {p23 && (
-          <Link className="text-sm text-accent" href={`/organizer/${p23.slug}/events/new`}>
+          <Link className="text-sm text-brand" href={`/organizer/${p23.slug}/events/new`}>
             + Create a Project23 event (shared engine; requires Project23 org membership)
           </Link>
         )}
@@ -62,7 +62,7 @@ export default async function AdminEvents({
             {live?.map((e) => (
               <tr key={e.id}>
                 <Td>
-                  <Link className="hover:text-accent" href={`/events/${e.slug}`}>
+                  <Link className="hover:text-brand" href={`/events/${e.slug}`}>
                     {e.title}
                   </Link>
                   <p className="text-xs text-fg-subtle">

@@ -17,14 +17,17 @@
   --fg: #fafafa;
   --fg-muted: #a1a1aa;
   --fg-subtle: #8b8b94;
-  --accent: #e4e4e7;
-  --accent-hover: #fafafa;
-  --accent-fg: #09090b;
+  --accent: #ace014; /* logo lime: primary actions */
+  --accent-hover: #bff036;
+  --accent-fg: #0b0c03;
+  --brand: #8b98ff; /* logo periwinkle, lifted for text on black */
+  --brand-strong: #6274fc; /* logo periwinkle */
+  --brand-soft: rgb(98 116 252 / 0.16);
   --success: #4ade80;
   --warning: #facc15;
   --danger: #f87171;
   --info: #93c5fd;
-  --ring: #a1a1aa;
+  --ring: #8b98ff;
   --radius: 0.5rem;
   --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.05);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -44,6 +47,9 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -111,7 +117,7 @@
     outline-offset: 2px;
   }
   ::selection {
-    background: color-mix(in oklab, var(--accent) 40%, transparent);
+    background: color-mix(in oklab, var(--brand-strong) 45%, transparent);
   }
   a {
     -webkit-tap-highlight-color: transparent;
