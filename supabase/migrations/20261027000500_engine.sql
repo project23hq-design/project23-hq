@@ -24,7 +24,7 @@ $$;
 create or replace function private.require_service() returns void
 language plpgsql stable set search_path = '' as $$
 begin
-  if coalesce(auth.role(), '') <> 'service_role' and session_user not in ('postgres', 'supabase_admin') then
+  if coalesce(auth.role(), '') <> 'service_role' and not private.is_db_admin_session() then
     perform private.fail('forbidden');
   end if;
 end $$;
@@ -579,7 +579,7 @@ begin
       failure_reason = format('expected %s %s (%s), got %s %s (%s)', pa.amount_minor, pa.currency, pa.environment,
         p_amount_minor, upper(p_currency), p_environment), verified_at = now()
     where id = pa.id;
-    if p_environment = pa.environment and p_amount_minor > 0 then
+    if p_environment = pa.environment and p_amount_minor > 0 and upper(p_currency) = pa.currency then
       perform private.post_ledger('mismatch:' || pa.id, 'payment_mismatch', upper(p_currency)::char(3), jsonb_build_array(
         jsonb_build_object('code', 'provider_clearing', 'owner', 'platform', 'debit', p_amount_minor),
         jsonb_build_object('code', 'unallocated_receipts', 'owner', 'platform', 'credit', p_amount_minor)), ord.id);
@@ -588,6 +588,11 @@ begin
       returning id into v_refund;
       insert into public.outbox_jobs (kind, payload, dedupe_key)
       values ('refund.process', jsonb_build_object('refund_id', v_refund), 'refund.process:' || v_refund);
+    else
+      -- Different currency/environment: cannot be booked automatically; operations must reconcile manually.
+      insert into public.outbox_jobs (kind, payload, dedupe_key)
+      values ('ops.alert', jsonb_build_object('reason', 'payment_mismatch_manual', 'reference', p_reference), 'ops.alert:mismatch:' || pa.id)
+      on conflict do nothing;
     end if;
     perform private.audit('payment.mismatch', 'payment_attempt', pa.id::text, ord.organization_id, null,
       jsonb_build_object('reference', p_reference));

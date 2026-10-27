@@ -170,6 +170,11 @@ const handlers: Record<string, Handler> = {
     }
   },
 
+  async "ops.alert"(payload) {
+    // Surfaces in structured logs (wire log alerts to on-call) and in the admin dead-letter/overview views.
+    logger({ scope: "ops.alert" }).error("operations alert", payload as unknown as Record<string, unknown>);
+  },
+
   async "payment.reconcile"({ reference }) {
     await confirmPayment(reference, "reconcile");
   },

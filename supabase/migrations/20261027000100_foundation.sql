@@ -20,11 +20,21 @@ language sql volatile set search_path = '' as $$
   select set_config('project23.internal', 'on', true);
 $$;
 
+-- Direct database administration (migrations, seed, psql maintenance) carries no request
+-- claims at all. Any request with claims (anon/authenticated) is never internal, even if the
+-- connection's login role is privileged.
+create or replace function private.is_db_admin_session() returns boolean
+language sql stable set search_path = '' as $$
+  select session_user in ('postgres', 'supabase_admin')
+     and coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb ->> 'role' is null
+     and coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), '') = '';
+$$;
+
 create or replace function private.is_internal() returns boolean
 language sql stable set search_path = '' as $$
   select coalesce(current_setting('project23.internal', true), '') = 'on'
       or coalesce(auth.role(), '') = 'service_role'
-      or session_user in ('postgres', 'supabase_admin');
+      or private.is_db_admin_session();
 $$;
 
 create or replace function private.touch_updated_at() returns trigger
