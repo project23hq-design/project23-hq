@@ -21,6 +21,38 @@ afterAll(() => pool.end());
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
 describe("row level security and privilege boundaries", () => {
+  it("publishes a complete draft immediately, refuses incomplete ones and outsiders", async () => {
+    const slug = `pub-${randomUUID().slice(0, 10)}`;
+    const [{ id }] = await admin<{ id: string }>(
+      `insert into public.events (organization_id, slug, title, description_html, category_id, venue_name, city_id, starts_at, ends_at, capacity, created_by, visibility)
+       select $1, $2, 'Publish test', '<p>Long enough description for publishing.</p>', (select id from public.categories limit 1),
+              'Test Venue', (select id from public.cities where slug = 'osogbo'), now() + interval '9 days', now() + interval '9 days 4 hours',
+              50, $3, 'unlisted' returning id`,
+      [ORGS.osc, slug, USERS.organizer],
+    );
+    await expectError(
+      as(user(USERS.organizer), "select public.event_publish($1)", [id]),
+      /event_incomplete/,
+    );
+    await admin(
+      `insert into public.ticket_types (event_id, organization_id, name, kind, price_minor, quantity_total)
+       values ($1, $2, 'GA', 'regular', 100000, 10)`,
+      [id, ORGS.osc],
+    );
+    await expectError(
+      as(user(USERS.customer), "select public.event_publish($1)", [id]),
+      /forbidden/,
+    );
+    await as(user(USERS.organizer), "select public.event_publish($1)", [id]);
+    const [ev] = await admin<{ status: string; moderation_status: string }>(
+      "select status, moderation_status from events where id = $1",
+      [id],
+    );
+    expect(ev).toEqual({ status: "published", moderation_status: "approved" });
+    const pub = await as(anon, "select slug from public_events where slug = $1", [slug]);
+    expect(pub).toHaveLength(1);
+  });
+
   it("approves a new organization immediately but never lets it verify itself", async () => {
     const owner = randomUUID();
     await admin(
@@ -66,11 +98,8 @@ describe("row level security and privilege boundaries", () => {
       "created_by",
     ])
       expect(names).not.toContain(c);
-    // drafts, pending and private events never appear publicly
-    const hidden = await as(
-      anon,
-      "select 1 from public_events where slug in ('ilesa-open-mic', 'ife-art-exhibition')",
-    );
+    // drafts never appear publicly
+    const hidden = await as(anon, "select 1 from public_events where slug = 'ilesa-open-mic'");
     expect(hidden).toHaveLength(0);
   });
 

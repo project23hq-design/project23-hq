@@ -189,8 +189,8 @@ select pg_temp.ev('30000000-0000-4000-8000-00000000000c', '20000000-0000-4000-80
   'Ilesa Open Mic Night', 'Draft event: an open mic for new comedians.',
   'comedy', 'ilesa', 'Owa Hall (fictional)', 'Palace Road, Ilesa', 40, 3, 100, 'draft');
 select pg_temp.ev('30000000-0000-4000-8000-00000000000d', '20000000-0000-4000-8000-000000000003', 'ife-art-exhibition',
-  'Ife Bronze & Beyond Exhibition', 'Student artists reinterpret classical Ife art. Awaiting moderation.',
-  'arts-culture', 'ile-ife', 'Gallery One (fictional)', 'Mayfair, Ile-Ife', 35, 6, 150, 'pending_review');
+  'Ife Bronze & Beyond Exhibition', 'Student artists reinterpret classical Ife art.',
+  'arts-culture', 'ile-ife', 'Gallery One (fictional)', 'Mayfair, Ile-Ife', 35, 6, 150, 'published');
 
 -- ---------------------------------------------------------------------------
 -- Ticket types (prices in kobo)

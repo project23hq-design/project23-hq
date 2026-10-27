@@ -1716,9 +1716,6 @@ isOneToOne: false
 "admin_ledger":
 { Args: { "p_limit"?: number,"p_order"?: string }; Returns: Json
                            },
-"admin_moderate_event":
-{ Args: { "p_decision": string,"p_event": string,"p_notes"?: string }; Returns: undefined
-                           },
 "admin_overview":
 { Args: { "p_from": string,"p_to": string }; Returns: Json
                            },
@@ -1770,11 +1767,11 @@ isOneToOne: false
 "email_mark":
 { Args: { "p_error"?: string,"p_id": string,"p_message_id"?: string,"p_provider": string,"p_status": string }; Returns: undefined
                            },
+"event_publish":
+{ Args: { "p_event": string }; Returns: undefined
+                           },
 "event_set_status":
 { Args: { "p_event": string,"p_reason"?: string,"p_status": Database["public"]['Enums']["event_status"] }; Returns: undefined
-                           },
-"event_submit_for_review":
-{ Args: { "p_event": string }; Returns: undefined
                            },
 "expire_holds":
 { Args: { "p_limit"?: number }; Returns: number

@@ -16,13 +16,12 @@ export type WorkspaceEvent = {
   capacity: number;
   cover_path: string | null;
   venue_name: string | null;
-  moderation_status?: string | null;
   categories?: { slug: string } | { slug: string }[] | null;
 };
 
 /** Columns needed to render a WorkspaceEventRow. */
 export const WORKSPACE_EVENT_COLUMNS =
-  "id, title, slug, status, moderation_status, starts_at, ends_at, timezone, admissions_sold, capacity, cover_path, venue_name, categories(slug)";
+  "id, title, slug, status, starts_at, ends_at, timezone, admissions_sold, capacity, cover_path, venue_name, categories(slug)";
 
 const STATUS: Record<string, { label: string; dot: string }> = {
   published: { label: "Live", dot: "bg-success" },
@@ -92,9 +91,6 @@ export function WorkspaceEventRow({ e, href }: { e: WorkspaceEvent; href: string
       </div>
       <div className="hidden w-28 shrink-0 sm:block">
         <StatusDot status={e.status} />
-        {e.moderation_status === "changes_requested" && (
-          <p className="mt-1 text-[11px] text-warning">Changes requested</p>
-        )}
       </div>
       <ChevronRight className="size-4 shrink-0 text-fg-subtle transition-colors group-hover:text-fg" />
     </Link>

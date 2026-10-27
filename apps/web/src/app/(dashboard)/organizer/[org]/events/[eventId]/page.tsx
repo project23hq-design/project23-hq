@@ -141,16 +141,6 @@ export default async function EventEditor({
           </Link>
         )}
       </div>
-      {e.moderation_status === "changes_requested" && (
-        <Alert tone="warning" className="mt-4" title="Changes requested by Project23">
-          {e.moderation_notes} Update the event and resubmit from the Publish tab.
-        </Alert>
-      )}
-      {e.moderation_status === "rejected" && (
-        <Alert tone="danger" className="mt-4" title="Rejected">
-          {e.moderation_notes}
-        </Alert>
-      )}
       {e.admissions_sold > 0 && !locked && (
         <Alert className="mt-4">
           Tickets have been sold. Date, time and venue changes notify every buyer by email and are
@@ -1254,17 +1244,22 @@ export default async function EventEditor({
       <div className="grid max-w-2xl gap-4">
         {ev.status === "draft" && (
           <Card className="p-5">
-            <h3 className="font-semibold">Submit for review</h3>
+            <h3 className="font-semibold">Publish</h3>
             <p className="mb-4 mt-1 text-sm text-fg-muted">
-              We check that details, venue and tickets are complete and the listing meets our
-              guidelines. Approved events go live immediately.
+              Your event goes live straight away and tickets go on sale. You need a description, a
+              future date, a venue and city (unless online), a category and at least one ticket
+              type.
             </p>
-            <LifecycleForm op="submit" label="Submit for review" />
+            <LifecycleForm op="submit" label="Publish event" />
           </Card>
         )}
-        {ev.status === "pending_review" && (
-          <Alert title="In review">
-            You&apos;ll get an email when it&apos;s approved or if changes are needed.
+        {ev.status === "published" && (
+          <Alert tone="success" title="Your event is live">
+            Tickets are on sale at{" "}
+            <Link className="text-fg underline" href={`/events/${ev.slug}`} target="_blank">
+              /events/{ev.slug}
+            </Link>
+            .
           </Alert>
         )}
         {ev.status === "published" && (

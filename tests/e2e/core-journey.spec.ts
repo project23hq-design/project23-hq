@@ -5,7 +5,8 @@ import { buyTickets, capturedEmails, q, qrToken, runWorker, signIn } from "./sup
 
 /**
  * Core acceptance journey (spec §15): a third-party organizer creates an event with Early
- * Bird and Regular tickets; Project23 staff approve it with MFA; a guest discovers it and buys
+ * Bird and Regular tickets and publishes it (no review queue); a platform admin with MFA can
+ * pause and resume it; a guest discovers it and buys
  * two admissions; receives two unique tickets by email and retrieves them securely; assigned
  * staff check each ticket in once; the organizer sees correct sales and net proceeds.
  */
@@ -20,7 +21,7 @@ const adminPassword = `Adm1n-${run}-local-only`;
 let eventId = "";
 let orderId = "";
 
-test("organizer creates an event with Early Bird and Regular tickets and submits it", async ({
+test("organizer creates an event with Early Bird and Regular tickets and publishes it", async ({
   page,
 }) => {
   await signIn(
@@ -78,14 +79,14 @@ test("organizer creates an event with Early Bird and Regular tickets and submits
   await expect(page.getByText("Staff updated.")).toBeVisible();
 
   await page.goto(`/organizer/osun-sound-collective/events/${eventId}?tab=publish`);
-  await page.getByRole("button", { name: "Submit for review" }).click();
-  await expect(page.getByText("In review", { exact: true })).toBeVisible();
-  // not public before approval
-  const res = await page.request.get(`/events/${slug}`);
-  expect(res.status()).toBe(404);
+  // a draft is never public
+  expect((await page.request.get(`/events/${slug}`)).status()).toBe(404);
+  await page.getByRole("button", { name: "Publish event" }).click();
+  await expect(page.getByText("Your event is live", { exact: true })).toBeVisible();
+  expect((await page.request.get(`/events/${slug}`)).status()).toBe(200);
 });
 
-test("a platform admin with MFA approves the event", async ({ page }) => {
+test("a platform admin with MFA can take the event down and restore it", async ({ page }) => {
   const [{ id }] = await q<{ id: string }>(
     `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
        confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
@@ -109,14 +110,19 @@ test("a platform admin with MFA approves the event", async ({ page }) => {
   await page.getByLabel("6-digit code").fill(generateSync({ secret }));
   await page.getByRole("button", { name: "Verify" }).click();
   await page.waitForURL((u) => u.pathname.startsWith("/super-admin"));
-  await page.goto("/super-admin/events");
-  const card = page
-    .locator("div", { has: page.getByText(title, { exact: true }) })
-    .filter({ has: page.getByRole("button", { name: "Submit decision" }) })
-    .last();
-  await card.getByRole("combobox").selectOption("approve");
-  await card.getByRole("button", { name: "Submit decision" }).click();
-  await expect.poll(async () => (await page.request.get(`/events/${slug}`)).status()).toBe(200);
+  await page.goto(`/super-admin/events?q=${encodeURIComponent(title)}`);
+  const row = page.getByRole("row", { name: new RegExp(title) });
+  page.once("dialog", (d) => d.accept());
+  await row.getByRole("button", { name: "Pause" }).click();
+  await expect(row.getByText("Event paused.")).toBeVisible();
+  await page.goto(`/events/${slug}`);
+  await expect(page.getByRole("button", { name: /Buy tickets/ })).toHaveCount(0); // off sale
+  await page.goto(`/super-admin/events?q=${encodeURIComponent(title)}`);
+  await page
+    .getByRole("row", { name: new RegExp(title) })
+    .getByRole("button", { name: "Resume" })
+    .click();
+  await expect(page.getByText("Event resumed.")).toBeVisible();
 });
 
 test("a guest discovers the event, buys two Early Bird tickets and gets two unique tickets", async ({

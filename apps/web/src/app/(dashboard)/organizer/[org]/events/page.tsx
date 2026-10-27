@@ -40,7 +40,7 @@ export default async function OrgEvents({ params }: { params: Promise<{ org: str
       {!events.length ? (
         <Card>
           <EmptyState title="No events yet">
-            Create your first event — it&apos;s saved as a draft until you submit it for review.
+            Create your first event — it&apos;s saved as a draft until you publish it.
           </EmptyState>
         </Card>
       ) : (

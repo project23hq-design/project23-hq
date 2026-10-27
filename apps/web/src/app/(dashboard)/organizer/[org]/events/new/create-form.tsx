@@ -515,7 +515,7 @@ export function CreateEventForm({
             {pending ? "Creating…" : "Create Event"}
           </button>
           <p className="text-center text-xs text-fg-muted">
-            Saved as a draft for {orgName}. Submit it for review when you&apos;re ready to go live.
+            Saved as a draft for {orgName}. Publish it from the next screen when you&apos;re ready.
           </p>
         </div>
       </aside>

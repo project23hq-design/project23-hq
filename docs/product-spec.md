@@ -46,10 +46,10 @@ Platform roles (`super_admin`, `finance_admin`, `support`) live in `platform_rol
 
 ## 5. Event lifecycle
 
-States: `draft → pending_review → published ⇄ paused → completed → archived`, plus `published|paused → cancelled → archived` and `pending_review → draft` (changes requested / rejected). Transitions are enforced by a trigger; engine-controlled fields (status, moderation, counters, featuring, organization) can't be changed by clients.
+States: `draft → published ⇄ paused → completed → archived`, plus `published|paused → cancelled → archived`. Transitions are enforced by a trigger; engine-controlled fields (status, moderation, counters, featuring, organization) can't be changed by clients.
 
-- **Submission** validates description, future start, venue+city for in-person, category, and at least one active ticket type.
-- **Moderation**: admins approve (requires an approved organization), request changes or reject with notes; the organizer is emailed; resubmission is allowed.
+- **Publishing** validates description, future start, venue+city for in-person, category, and at least one active ticket type.
+- Organizers publish directly; there is no review queue. Admins can pause or cancel any event and block or suspend an organization.
 - **Edits after sales**: slug and admissions-per-unit/currency are frozen; capacity/quantities can't drop below sold+held (CHECK constraints); date/venue changes are audited and every buyer is emailed (`event.material_change` job). Price edits affect new orders only (order items snapshot prices).
 - **Cancellation** stops sales, releases holds, closes the referral program, refunds every paid order (including used tickets) as a tracked refund batch, reverses commissions, and emails buyers.
 - **Completion** is automatic 6 hours after `ends_at`.

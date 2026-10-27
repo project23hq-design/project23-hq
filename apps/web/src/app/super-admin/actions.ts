@@ -20,14 +20,15 @@ const done = (
   return error ? { error: engineErrorMessage(engineCode(error), error.message) } : { message: ok };
 };
 
-export async function moderateEventAction(_: ActionState, f: FormData): Promise<ActionState> {
+export async function adminEventStatusAction(_: ActionState, f: FormData): Promise<ActionState> {
   const { supabase } = await requirePlatformAdmin();
-  const { error } = await supabase.rpc("admin_moderate_event", {
+  const to = str(f, "status") === "published" ? "published" : "paused";
+  const { error } = await supabase.rpc("event_set_status", {
     p_event: str(f, "eventId"),
-    p_decision: str(f, "decision"),
-    p_notes: str(f, "notes") || undefined,
+    p_status: to,
+    p_reason: "Platform admin action",
   });
-  return done(error, "Moderation decision recorded.", "/super-admin/events");
+  return done(error, to === "paused" ? "Event paused." : "Event resumed.", "/super-admin/events");
 }
 
 export async function featureEventAction(_: ActionState, f: FormData): Promise<ActionState> {

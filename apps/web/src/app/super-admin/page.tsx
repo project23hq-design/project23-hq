@@ -81,7 +81,6 @@ export default async function AdminOverview({
         <Stat label="Refunds" value={formatMoney(ov.refunds_minor)} />
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Events to review" value={ov.pending_events} />
         <Stat label="Payout queue" value={ov.payout_queue} />
         <Stat label="Open refund requests" value={ov.open_refund_requests} />
         <Stat label="Open disputes" value={ov.open_disputes} />

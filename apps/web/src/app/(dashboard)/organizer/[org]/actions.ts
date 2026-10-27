@@ -221,7 +221,7 @@ export async function eventLifecycleAction(_: ActionState, f: FormData): Promise
   const reason = s(f, "reason");
   const { error } =
     op === "submit"
-      ? await supabase.rpc("event_submit_for_review", { p_event: eventId })
+      ? await supabase.rpc("event_publish", { p_event: eventId })
       : op === "cancel"
         ? await supabase.rpc("cancel_event", { p_event: eventId, p_reason: reason ?? "" })
         : await supabase.rpc("event_set_status", {
@@ -234,7 +234,7 @@ export async function eventLifecycleAction(_: ActionState, f: FormData): Promise
   return {
     message:
       {
-        submit: "Submitted for review. We'll email you when it's approved.",
+        submit: "Your event is live.",
         cancel: "Event cancelled. Refunds are being processed and buyers notified.",
         paused: "Sales paused.",
         published: "Sales resumed.",
