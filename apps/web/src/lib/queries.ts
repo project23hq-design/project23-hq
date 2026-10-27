@@ -26,10 +26,11 @@ export type EventCardData = Pick<
   | "status"
   | "category_slug"
   | "category_name"
+  | "tags"
 >;
 
 const CARD_COLUMNS =
-  "id, slug, title, starts_at, ends_at, timezone, venue_name, city_name, organization_name, organization_slug, is_first_party, organization_verified, cover_path, cover_alt, min_price_minor, max_price_minor, is_sold_out, sales_ended, status, category_slug, category_name";
+  "id, slug, title, starts_at, ends_at, timezone, venue_name, city_name, organization_name, organization_slug, is_first_party, organization_verified, cover_path, cover_alt, min_price_minor, max_price_minor, is_sold_out, sales_ended, status, category_slug, category_name, tags";
 
 export interface ExploreFilters {
   q?: string;
@@ -42,7 +43,7 @@ export interface ExploreFilters {
   page?: number;
 }
 
-export const PAGE_SIZE = 12;
+export const PAGE_SIZE = 16;
 
 function windowFor(when: ExploreFilters["when"]): { from: string; to?: string } {
   const now = new Date();
@@ -112,7 +113,8 @@ export async function exploreEvents(f: ExploreFilters) {
     default:
       q = q.order("starts_at", { ascending: true });
   }
-  q = q.order("id").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  // "Show more" is cumulative: page n returns the first n × PAGE_SIZE results.
+  q = q.order("id").range(0, page * PAGE_SIZE - 1);
   const { data, count, error } = await q;
   if (error) throw error;
   return {

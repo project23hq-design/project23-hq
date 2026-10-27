@@ -51,7 +51,7 @@ export default async function AdminOverview({
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-3xl font-bold">Operations overview</h1>
+        <h1 className="text-3xl font-medium">Operations overview</h1>
         <div className="flex gap-1 text-sm">
           {[7, 30, 90].map((d) => (
             <Link

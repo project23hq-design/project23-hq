@@ -23,7 +23,7 @@ export default async function AdminOrgs({
   const { data: orgs } = await query;
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Organizations</h1>
+      <h1 className="text-3xl font-medium">Organizations</h1>
       <form>
         <Input name="q" defaultValue={q} placeholder="Search name or slug" className="max-w-sm" />
       </form>

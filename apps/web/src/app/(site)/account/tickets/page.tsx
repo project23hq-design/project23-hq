@@ -39,7 +39,7 @@ export default async function MyTickets() {
   const past = list.filter((o) => new Date(o.ev.ends_at).getTime() <= now);
   return (
     <div>
-      <h1 className="text-3xl font-bold">My tickets</h1>
+      <h1 className="text-3xl font-medium">My tickets</h1>
       {upcoming.length === 0 ? (
         <div className="mt-6">
           <EmptyState
@@ -65,7 +65,7 @@ export default async function MyTickets() {
                     slug={o.ev.slug}
                     title={o.ev.title}
                     coverPath={o.ev.cover_path}
-                    variant="square"
+                    shape="square"
                     className="w-24 shrink-0 [&_span]:text-[10px]"
                     sizes="96px"
                   />
@@ -86,7 +86,7 @@ export default async function MyTickets() {
       )}
       {past.length > 0 && (
         <>
-          <h2 className="mt-12 text-xl font-bold">Past</h2>
+          <h2 className="mt-12 text-xl font-medium">Past</h2>
           <ul className="mt-4 space-y-2 text-sm text-fg-muted">
             {past.map((o) => (
               <li key={o.id}>

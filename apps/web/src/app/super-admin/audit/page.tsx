@@ -14,7 +14,7 @@ export default async function Audit({
   const { data } = await q;
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Audit log</h1>
+      <h1 className="text-3xl font-medium">Audit log</h1>
       <form>
         <Input
           name="action"

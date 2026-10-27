@@ -180,3 +180,66 @@ export function priceLabel(
     ? format(e.min_price_minor)
     : `From ${format(e.min_price_minor)}`;
 }
+
+/** Compact card date like the reference: "Sat, Nov 14, 7pm - 2am" (event timezone). */
+export function formatCardDate(
+  startsAt: string | Date,
+  endsAt: string | Date | null | undefined,
+  timezone = DEFAULT_TIMEZONE,
+): string {
+  const s = new Date(startsAt);
+  const day = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: timezone,
+  }).format(s);
+  const t = (d: Date) => {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: timezone,
+    }).formatToParts(d);
+    const h = parts.find((p) => p.type === "hour")?.value ?? "";
+    const m = parts.find((p) => p.type === "minute")?.value ?? "00";
+    const ap = (parts.find((p) => p.type === "dayPeriod")?.value ?? "").toLowerCase();
+    return `${h}${m === "00" ? "" : `:${m}`}${ap}`;
+  };
+  return endsAt ? `${day}, ${t(s)} - ${t(new Date(endsAt))}` : `${day}, ${t(s)}`;
+}
+
+/** Long event-page date: "Sat, Nov 14 at 7:00 PM - 2:00 AM (WAT)". */
+export function formatEventLine(
+  startsAt: string | Date,
+  endsAt: string | Date,
+  timezone = DEFAULT_TIMEZONE,
+): string {
+  const s = new Date(startsAt);
+  const e = new Date(endsAt);
+  const day = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: timezone,
+  }).format(s);
+  const time = (d: Date) =>
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: timezone,
+    }).format(d);
+  const sameDay =
+    day ===
+      new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        timeZone: timezone,
+      }).format(e) || e.getTime() - s.getTime() < 18 * 3600_000;
+  const tz = timezone === "Africa/Lagos" ? "WAT" : timezone;
+  return sameDay
+    ? `${day} at ${time(s)} - ${time(e)} (${tz})`
+    : `${day} at ${time(s)} - ${new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: timezone }).format(e)}, ${time(e)} (${tz})`;
+}

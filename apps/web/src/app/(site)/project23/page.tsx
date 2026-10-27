@@ -27,7 +27,7 @@ export default async function Project23Events() {
         <Sparkles className="size-3.5" aria-hidden />
         Official
       </p>
-      <h1 className="mt-2 text-4xl font-extrabold sm:text-6xl">Project23 Events</h1>
+      <h1 className="mt-2 text-4xl font-medium sm:text-6xl">Project23 Events</h1>
       <p className="mt-3 max-w-2xl text-fg-muted">
         Nights, sessions and workshops produced by the Project23 team. Same checkout, same buyer
         protections and refund rules as every organizer on the platform.

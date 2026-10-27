@@ -23,7 +23,7 @@ export default async function GuestOrdersPage() {
   );
   return (
     <div className="container-page max-w-3xl pt-10">
-      <h1 className="text-3xl font-bold">Your orders</h1>
+      <h1 className="text-3xl font-medium">Your orders</h1>
       <p className="mt-1 text-sm text-fg-muted">
         Signed in by email link as {g.email}.{" "}
         <Link className="text-accent underline" href="/sign-up">

@@ -34,7 +34,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ order
         <>
           <div className="mt-2 flex items-center gap-3">
             <CheckCircle2 className="size-8 text-success" aria-hidden />
-            <h1 className="text-3xl font-bold">You&apos;re in!</h1>
+            <h1 className="text-3xl font-medium">You&apos;re in!</h1>
           </div>
           <p className="mt-2 text-fg-muted">
             We&apos;ve emailed your tickets to{" "}
@@ -49,7 +49,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ order
 
       {order.status === "pending_payment" && (
         <>
-          <h1 className="mt-2 text-3xl font-bold">Complete your order</h1>
+          <h1 className="mt-2 text-3xl font-medium">Complete your order</h1>
           {holdActive ? (
             <HoldCountdown until={order.hold_expires_at!} />
           ) : (
@@ -90,7 +90,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ order
         <Card className="mt-6 p-6">
           <div className="flex items-center gap-3">
             <Clock className="size-6 text-warning" aria-hidden />
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-medium">
               This order {order.status === "expired" ? "expired" : "was cancelled"}
             </h1>
           </div>
@@ -110,7 +110,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ order
         <Card className="mt-6 p-6">
           <div className="flex items-center gap-3">
             <XCircle className="size-6 text-danger" aria-hidden />
-            <h1 className="text-2xl font-bold">We couldn&apos;t issue your tickets</h1>
+            <h1 className="text-2xl font-medium">We couldn&apos;t issue your tickets</h1>
           </div>
           <p className="mt-2 text-fg-muted">
             Your payment arrived after the tickets became unavailable. No tickets were issued and a

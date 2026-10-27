@@ -19,7 +19,7 @@ export default async function AccountOrder({ params }: { params: Promise<{ order
   const open = refunds?.find((r) => ["requested", "approved", "processing"].includes(r.status));
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-bold">{bundle.event?.title}</h1>
+      <h1 className="text-3xl font-medium">{bundle.event?.title}</h1>
       <div className="mt-3">
         <ResendButton orderId={orderId} />
       </div>

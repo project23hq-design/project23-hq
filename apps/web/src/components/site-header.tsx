@@ -1,168 +1,103 @@
 import Link from "next/link";
-import { Menu, Search, Ticket, UserRound } from "lucide-react";
-import { Button, Dialog, DialogContent, DialogTrigger } from "@project23/ui";
+import { Menu } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@project23/ui";
 import { getSession } from "@/lib/auth";
+import { HeaderNav } from "./header-nav";
 
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={`font-display text-xl font-extrabold tracking-tight ${className ?? ""}`}>
-      project<span className="text-accent">23</span>
+    <span
+      className={`font-display text-[19px] font-semibold tracking-[-0.03em] ${className ?? ""}`}
+    >
+      project23
     </span>
   );
 }
 
+/** 64px transparent header: wordmark left, 12px text links + "Create event" pill right. */
 export async function SiteHeader() {
   const { user } = await getSession();
   const links = [
-    { href: "/explore", label: "Explore" },
-    { href: "/project23", label: "Project23 Events" },
-    { href: "/organizer", label: "Sell tickets" },
+    { href: "/explore", label: "Events" },
+    { href: "/project23", label: "Project23" },
+    { href: "/help", label: "Help" },
+    user ? { href: "/account", label: "Account" } : { href: "/sign-in", label: "Login" },
   ];
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-line/60 bg-bg/85 backdrop-blur-md supports-[backdrop-filter]:bg-bg/70">
-      <div className="container-page flex h-16 items-center gap-4">
+    <header className="no-print relative z-40">
+      <div className="mx-auto flex h-16 max-w-[1120px] items-center px-4 sm:px-8">
         <Link
           href="/"
           aria-label="Project23 home"
-          className="rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Wordmark />
         </Link>
-        <nav aria-label="Main" className="ml-4 hidden items-center gap-1 md:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-full px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-2 hover:text-fg"
-            >
-              {l.label}
-            </Link>
-          ))}
+        <nav aria-label="Main" className="ml-auto hidden items-center md:flex">
+          <HeaderNav links={links} />
+          <Link
+            href="/organizer"
+            className="ml-3 inline-flex h-8 items-center rounded-full bg-[#27272a] px-3 text-xs font-medium text-fg hover:bg-[#3f3f46]"
+          >
+            Create event
+          </Link>
         </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Button asChild variant="ghost" size="icon" aria-label="Search events">
-            <Link href="/explore">
-              <Search />
-            </Link>
-          </Button>
-          {user ? (
-            <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link href="/account/tickets">
-                  <Ticket /> My tickets
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              className="ml-auto inline-flex size-9 items-center justify-center rounded-full text-fg hover:bg-white/[0.06] md:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="size-5" />
+            </button>
+          </DialogTrigger>
+          <DialogContent title="Menu" side="right">
+            <nav aria-label="Mobile" className="grid gap-1 text-base">
+              {[
+                ...links,
+                { href: "/account/tickets", label: "My tickets" },
+                { href: "/orders/lookup", label: "Find my tickets" },
+                { href: "/promoter", label: "Promote events" },
+                { href: "/organizer", label: "Create event" },
+              ].map((l) => (
+                <Link
+                  key={l.href + l.label}
+                  href={l.href}
+                  className="rounded-lg px-3 py-2.5 hover:bg-white/[0.06]"
+                >
+                  {l.label}
                 </Link>
-              </Button>
-              <Button asChild variant="secondary" size="icon" aria-label="Account">
-                <Link href="/account">
-                  <UserRound />
-                </Link>
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link href="/sign-in">Log in</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/sign-up">Sign up</Link>
-              </Button>
-            </>
-          )}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-                <Menu />
-              </Button>
-            </DialogTrigger>
-            <DialogContent title="Menu" side="right">
-              <nav aria-label="Mobile" className="grid gap-1">
-                {[
-                  ...links,
-                  { href: "/orders/lookup", label: "Find my tickets" },
-                  { href: "/promoter", label: "Promoter earnings" },
-                  { href: "/help", label: "Help" },
-                ].map((l) => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className="rounded-xl px-3 py-3 text-base font-medium hover:bg-surface-2"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
-              </nav>
-            </DialogContent>
-          </Dialog>
-        </div>
+              ))}
+            </nav>
+          </DialogContent>
+        </Dialog>
       </div>
     </header>
   );
 }
 
 export function SiteFooter() {
-  const cols = [
-    {
-      title: "Discover",
-      links: [
-        ["/explore", "Explore events"],
-        ["/explore?city=osogbo", "Osogbo"],
-        ["/explore?city=ile-ife", "Ile-Ife"],
-        ["/project23", "Project23 Events"],
-      ],
-    },
-    {
-      title: "Organizers",
-      links: [
-        ["/organizer", "Sell tickets"],
-        ["/promoter", "Promoter program"],
-        ["/legal/organizer-terms", "Organizer terms"],
-      ],
-    },
-    {
-      title: "Support",
-      links: [
-        ["/help", "Help centre"],
-        ["/orders/lookup", "Find my tickets"],
-        ["/contact", "Contact"],
-        ["/legal/refund-policy", "Refund policy"],
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        ["/about", "About"],
-        ["/legal/terms", "Terms"],
-        ["/legal/privacy", "Privacy"],
-      ],
-    },
+  const links = [
+    ["/about", "About"],
+    ["/help", "Help"],
+    ["/contact", "Contact"],
+    ["/orders/lookup", "Find my tickets"],
+    ["/promoter", "Promoters"],
+    ["/legal/terms", "Terms"],
+    ["/legal/privacy", "Privacy"],
+    ["/legal/refund-policy", "Refunds"],
   ];
   return (
-    <footer className="no-print mt-24 border-t border-line">
-      <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="space-y-3">
-          <Wordmark />
-          <p className="max-w-xs text-sm text-fg-muted">
-            Events across Osun State and Nigeria. Prices in naira; times shown in West Africa Time
-            unless stated.
-          </p>
-        </div>
-        {cols.map((c) => (
-          <div key={c.title}>
-            <h2 className="text-sm font-semibold">{c.title}</h2>
-            <ul className="mt-3 space-y-2">
-              {c.links.map(([href, label]) => (
-                <li key={href}>
-                  <Link href={href!} className="text-sm text-fg-muted hover:text-fg">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="container-page border-t border-line py-6 text-xs text-fg-subtle">
-        © {new Date().getFullYear()} Project23. Event listings are provided by organizers.
+    <footer className="no-print mt-32 border-t border-white/[0.05]">
+      <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-8 text-xs text-fg-muted sm:flex-row sm:items-center sm:px-8">
+        <Wordmark className="text-sm text-fg" />
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 sm:ml-auto">
+          {links.map(([href, label]) => (
+            <Link key={href} href={href!} className="hover:text-fg">
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </footer>
   );

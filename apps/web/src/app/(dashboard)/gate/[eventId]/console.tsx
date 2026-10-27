@@ -186,12 +186,12 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
           <Link href="/gate" className="text-xs text-fg-muted">
             ← Events
           </Link>
-          <h1 className="truncate text-lg font-bold">{event.title}</h1>
+          <h1 className="truncate text-lg font-medium">{event.title}</h1>
         </div>
         <div className="text-right text-sm tabular-nums" aria-live="polite">
           {stats ? (
             <>
-              <span className="font-display text-xl font-bold">{stats.checked_in}</span>
+              <span className="font-display text-xl font-medium">{stats.checked_in}</span>
               <span className="text-fg-muted"> / {stats.valid} in</span>
             </>
           ) : (
@@ -214,7 +214,7 @@ export function GateConsole({ event, ticketTypes }: { event: Ev; ticketTypes: TT
         >
           {ui.icon}
           <div className="min-w-0">
-            <p className="font-display text-2xl font-extrabold">{ui.title}</p>
+            <p className="font-display text-2xl font-medium">{ui.title}</p>
             {result.ticket_type && (
               <p className="font-semibold">
                 {result.ticket_type}

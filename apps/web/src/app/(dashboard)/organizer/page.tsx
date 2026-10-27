@@ -13,7 +13,7 @@ export default async function OrganizerHome() {
   if (manageable.length === 1) redirect(`/organizer/${manageable[0]!.slug}`);
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-bold">Your organizations</h1>
+      <h1 className="text-3xl font-medium">Your organizations</h1>
       {manageable.length === 0 ? (
         <div className="mt-8">
           <EmptyState

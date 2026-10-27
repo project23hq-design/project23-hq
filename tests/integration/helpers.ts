@@ -116,16 +116,19 @@ export async function createEvent(opts: {
   tickets: TicketSpec[];
   startsInDays?: number;
   title?: string;
+  visibility?: "public" | "unlisted";
 }) {
   const org = opts.org ?? ORGS.osc;
   const slug = `t-${randomUUID().slice(0, 12)}`;
+  // Unlisted so test fixtures never appear in public discovery; still purchasable by link.
+  const visibility = opts.visibility ?? "unlisted";
   const [{ id }] = await admin<{ id: string }>(
-    `insert into public.events (organization_id, slug, title, description_html, category_id, venue_name, city_id, starts_at, ends_at, capacity, status, moderation_status, published_at, created_by)
+    `insert into public.events (organization_id, slug, title, description_html, category_id, venue_name, city_id, starts_at, ends_at, capacity, status, moderation_status, published_at, created_by, visibility)
      select $1, $2, $3, '<p>Test event description long enough.</p>', (select id from public.categories limit 1), 'Test Venue',
             (select id from public.cities where slug = 'osogbo'), now() + make_interval(days => $4), now() + make_interval(days => $4) + interval '5 hours',
-            $5, 'published', 'approved', now(), (select user_id from public.memberships where organization_id = $1 and role = 'owner' limit 1)
+            $5, 'published', 'approved', now(), (select user_id from public.memberships where organization_id = $1 and role = 'owner' limit 1), $6::public.event_visibility
      returning id`,
-    [org, slug, opts.title ?? `Test ${slug}`, opts.startsInDays ?? 10, opts.capacity],
+    [org, slug, opts.title ?? `Test ${slug}`, opts.startsInDays ?? 10, opts.capacity, visibility],
   );
   const types: string[] = [];
   for (const [i, t] of opts.tickets.entries()) {

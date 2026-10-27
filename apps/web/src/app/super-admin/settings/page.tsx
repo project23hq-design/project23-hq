@@ -8,7 +8,7 @@ export default async function Settings() {
   const { data } = await supabase.from("platform_settings").select("*").order("key");
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Platform settings</h1>
+      <h1 className="text-3xl font-medium">Platform settings</h1>
       <p className="text-sm text-fg-muted">
         Changes are audited with the old and new values. Values are JSON. Staff platform roles are
         provisioned out-of-band (see docs/operations.md), never through this UI or signup.

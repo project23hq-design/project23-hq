@@ -11,13 +11,13 @@ export { cn, buttonVariants } from "./utils";
 
 // ---------------------------------------------------------------- Form controls
 const fieldBase =
-  "w-full rounded-xl border border-line bg-surface-1 px-3.5 text-fg placeholder:text-fg-subtle transition-colors focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50 aria-[invalid=true]:border-danger";
+  "w-full rounded-lg border border-white/[0.06] bg-white/[0.05] px-3 text-fg placeholder:text-fg-subtle transition-colors focus-visible:outline-none focus-visible:border-white/25 focus-visible:bg-white/[0.07] disabled:opacity-50 aria-[invalid=true]:border-danger";
 
 export const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
 >(({ className, ...props }, ref) => (
-  <input ref={ref} className={cn(fieldBase, "h-11 text-[15px]", className)} {...props} />
+  <input ref={ref} className={cn(fieldBase, "h-10 text-sm", className)} {...props} />
 ));
 Input.displayName = "Input";
 
@@ -25,11 +25,7 @@ export const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(({ className, ...props }, ref) => (
-  <textarea
-    ref={ref}
-    className={cn(fieldBase, "min-h-28 py-3 text-[15px]", className)}
-    {...props}
-  />
+  <textarea ref={ref} className={cn(fieldBase, "min-h-28 py-2.5 text-sm", className)} {...props} />
 ));
 Textarea.displayName = "Textarea";
 
@@ -41,7 +37,7 @@ export const Select = React.forwardRef<
     ref={ref}
     className={cn(
       fieldBase,
-      "h-11 appearance-none bg-[length:16px] bg-[right_12px_center] bg-no-repeat pr-10 text-[15px] select-chevron",
+      "h-10 appearance-none bg-[length:16px] bg-[right_10px_center] bg-no-repeat pr-9 text-sm select-chevron",
       className,
     )}
     {...props}
@@ -107,28 +103,29 @@ export function Field({
 // ---------------------------------------------------------------- Surfaces
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("rounded-2xl border border-line bg-surface-1", className)} {...props} />
+    <div
+      className={cn("rounded-xl border border-white/[0.05] bg-white/[0.035]", className)}
+      {...props}
+    />
   );
 }
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("flex flex-col gap-1 p-5 pb-3", className)} {...props} />;
 }
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return (
-    <h3 className={cn("font-display text-lg font-semibold tracking-tight", className)} {...props} />
-  );
+  return <h3 className={cn("font-display text-base font-medium", className)} {...props} />;
 }
 export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("p-5 pt-0", className)} {...props} />;
 }
 
 export const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold leading-5 [&_svg]:size-3.5",
+  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium leading-4 [&_svg]:size-3.5",
   {
     variants: {
       tone: {
-        neutral: "bg-surface-3 text-fg-muted",
-        accent: "bg-accent/15 text-accent",
+        neutral: "bg-white/[0.08] text-fg-muted",
+        accent: "bg-white/[0.12] text-fg",
         success: "bg-success/15 text-success",
         warning: "bg-warning/15 text-warning",
         danger: "bg-danger/15 text-danger",
@@ -151,7 +148,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       aria-hidden
-      className={cn("animate-pulse rounded-xl bg-surface-2 motion-reduce:animate-none", className)}
+      className={cn("animate-pulse rounded bg-white/[0.06] motion-reduce:animate-none", className)}
       {...props}
     />
   );
@@ -169,7 +166,7 @@ export function Alert({
   className?: string;
 }) {
   const tones = {
-    info: "border-info/30 bg-info/10",
+    info: "border-white/[0.06] bg-white/[0.04]",
     success: "border-success/30 bg-success/10",
     warning: "border-warning/40 bg-warning/10",
     danger: "border-danger/40 bg-danger/10",
@@ -177,7 +174,7 @@ export function Alert({
   return (
     <div
       role={tone === "danger" ? "alert" : "status"}
-      className={cn("rounded-2xl border p-4 text-sm", tones[tone], className)}
+      className={cn("rounded-xl border p-4 text-sm", tones[tone], className)}
     >
       {title && <p className="font-semibold text-fg">{title}</p>}
       {children && <div className={cn("text-fg-muted", title && "mt-1")}>{children}</div>}
@@ -197,9 +194,9 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line px-6 py-12 text-center">
+    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
       {icon && <div className="text-fg-subtle [&_svg]:size-8">{icon}</div>}
-      <p className="font-display text-lg font-semibold">{title}</p>
+      <p className="text-base">{title}</p>
       {children && <div className="max-w-md text-sm text-fg-muted">{children}</div>}
       {action}
     </div>
@@ -209,7 +206,7 @@ export function EmptyState({
 // ---------------------------------------------------------------- Data table shell
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-line">
+    <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06]">
       <table className={cn("w-full min-w-[640px] border-collapse text-sm", className)} {...props} />
     </div>
   );
@@ -219,7 +216,7 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
     <th
       scope="col"
       className={cn(
-        "border-b border-line bg-surface-1 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-fg-subtle",
+        "border-b border-white/[0.06] px-4 py-3 text-left text-xs font-medium text-fg-muted",
         className,
       )}
       {...props}
@@ -227,7 +224,12 @@ export function Th({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   );
 }
 export function Td({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("border-b border-line px-4 py-3 align-middle", className)} {...props} />;
+  return (
+    <td
+      className={cn("border-b border-white/[0.04] px-4 py-3 align-middle", className)}
+      {...props}
+    />
+  );
 }
 
 export function Stat({
@@ -240,9 +242,9 @@ export function Stat({
   hint?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface-1 p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">{label}</p>
-      <p className="mt-1 font-display text-2xl font-semibold tabular-nums">{value}</p>
+    <div className="rounded-xl border border-white/[0.05] bg-white/[0.035] p-4">
+      <p className="text-xs text-fg-muted">{label}</p>
+      <p className="mt-1 font-display text-2xl font-medium tabular-nums">{value}</p>
       {hint && <p className="mt-1 text-xs text-fg-muted">{hint}</p>}
     </div>
   );

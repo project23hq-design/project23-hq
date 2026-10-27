@@ -45,11 +45,11 @@ export default async function OrganizerProfile({ params }: { params: P }) {
   return (
     <div className="container-page pt-10">
       <div className="flex items-center gap-4">
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-surface-2 font-display text-2xl font-bold">
+        <div className="flex size-16 items-center justify-center rounded-2xl bg-surface-2 font-display text-2xl font-medium">
           {org.name!.slice(0, 1)}
         </div>
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold">
+          <h1 className="flex items-center gap-2 text-3xl font-medium">
             {org.name}
             {org.is_first_party ? (
               <Sparkles className="size-5 text-accent" aria-label="Official Project23 organizer" />
@@ -67,7 +67,7 @@ export default async function OrganizerProfile({ params }: { params: P }) {
       {org.description && (
         <p className="mt-6 max-w-2xl whitespace-pre-line text-fg-muted">{org.description}</p>
       )}
-      <h2 className="mb-6 mt-12 text-2xl font-bold">Upcoming events</h2>
+      <h2 className="mb-6 mt-12 text-2xl font-medium">Upcoming events</h2>
       {events.length === 0 ? (
         <EmptyState title="No upcoming events" />
       ) : (

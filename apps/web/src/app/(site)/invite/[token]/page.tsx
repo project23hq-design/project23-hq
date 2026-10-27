@@ -14,7 +14,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   return (
     <div className="container-page flex justify-center py-16">
       <Card className="w-full max-w-md space-y-4 p-6">
-        <h1 className="text-2xl font-bold">Join an organization</h1>
+        <h1 className="text-2xl font-medium">Join an organization</h1>
         <p className="text-sm text-fg-muted">
           You&apos;re signed in as <strong className="text-fg">{user.email}</strong>. The invitation
           only works for the email address it was sent to.

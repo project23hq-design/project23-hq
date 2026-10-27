@@ -2,32 +2,31 @@
 @source "../../../../packages/ui/src";
 
 /*
- * Project23 design tokens.
- * A restrained near-black canvas lets event artwork carry the colour; one warm accent
- * ("Osun gold") marks primary actions. All text pairs below meet WCAG AA on --bg/--surface-1.
- *   fg (#F4F1EA) on bg: 17.6:1 · fg-muted (#B9B4AA) on bg: 9.6:1 · fg-subtle (#8F8A82) on bg: 5.6:1
- *   accent-fg (#14110B) on accent (#F5A524): 10.1:1
+ * Project23 design tokens — modelled on the reference (posh.vip/explore): a pure black/zinc
+ * canvas, white type, zinc-400 metadata, no brand colour. Event artwork provides all colour.
+ * The "accent" token is the light neutral used for primary pill buttons (zinc-200 on black).
+ * Contrast on --bg: fg 19.3:1 · fg-muted 7.9:1 · fg-subtle 5.3:1 · accent-fg on accent 16:1.
  */
 :root {
-  --bg: #0b0b0d;
-  --surface-1: #141417;
-  --surface-2: #1c1c21;
-  --surface-3: #27272e;
-  --line: #2a2a31;
-  --line-strong: #3d3d46;
-  --fg: #f4f1ea;
-  --fg-muted: #b9b4aa;
-  --fg-subtle: #8f8a82;
-  --accent: #f5a524;
-  --accent-hover: #ffb84d;
-  --accent-fg: #14110b;
-  --success: #3ccb7f;
-  --warning: #f5c04a;
-  --danger: #ff6b6b;
-  --info: #7cc0ff;
-  --ring: #f5a524;
-  --radius: 1rem;
-  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --bg: #09090b;
+  --surface-1: #111113;
+  --surface-2: #18181b;
+  --surface-3: #27272a;
+  --line: #1f1f23;
+  --line-strong: #2f2f35;
+  --fg: #fafafa;
+  --fg-muted: #a1a1aa;
+  --fg-subtle: #8b8b94;
+  --accent: #e4e4e7;
+  --accent-hover: #fafafa;
+  --accent-fg: #09090b;
+  --success: #4ade80;
+  --warning: #facc15;
+  --danger: #f87171;
+  --info: #93c5fd;
+  --ring: #a1a1aa;
+  --radius: 0.5rem;
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.05);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: dark;
 }
@@ -51,7 +50,8 @@
   --color-info: var(--info);
   --color-ring: var(--ring);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
   --shadow-pop: var(--shadow-pop);
   --animate-in-fade: in-fade 180ms var(--ease-out);
   --animate-in-up: in-up 260ms var(--ease-out);
@@ -100,7 +100,7 @@
   h2,
   h3,
   h4 {
-    @apply font-display tracking-tight;
+    @apply font-display font-medium;
     text-wrap: balance;
   }
   p {
@@ -120,16 +120,16 @@
 
 @layer components {
   .container-page {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[1120px] px-4 sm:px-8;
   }
   .select-chevron {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b9b4aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
   .prose-event {
-    @apply space-y-3 text-[15px] leading-7 text-fg-muted;
+    @apply space-y-4 text-base leading-6 text-fg/90;
   }
   .prose-event a {
-    @apply text-accent underline underline-offset-4;
+    @apply text-fg underline underline-offset-4;
   }
   .prose-event strong {
     @apply text-fg;

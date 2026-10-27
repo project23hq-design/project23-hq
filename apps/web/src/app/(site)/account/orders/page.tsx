@@ -16,7 +16,7 @@ export default async function OrdersPage() {
     .limit(100);
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">Orders</h1>
+      <h1 className="mb-6 text-3xl font-medium">Orders</h1>
       {!orders?.length ? (
         <EmptyState title="No orders yet" />
       ) : (

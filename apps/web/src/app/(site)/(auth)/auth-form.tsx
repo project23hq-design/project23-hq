@@ -1,13 +1,17 @@
 "use client";
 import { useActionState } from "react";
 import Link from "next/link";
-import { Alert, Button, Card, Field, Input } from "@project23/ui";
+import { Alert } from "@project23/ui";
 
 type Action = (
   s: { error?: string; message?: string } | undefined,
   f: FormData,
 ) => Promise<{ error?: string; message?: string } | undefined>;
 
+const input =
+  "h-10 w-full rounded-md border border-white/[0.06] bg-white/[0.03] px-3 text-sm placeholder:text-fg-subtle focus:border-white/25 focus:outline-none";
+
+/** Centered, card-less auth screens (reference login style). */
 export function AuthForm({
   mode,
   action,
@@ -19,112 +23,135 @@ export function AuthForm({
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const titles = {
-    "sign-in": "Welcome back",
+    "sign-in": "Log in to Project23",
     "sign-up": "Create your account",
     forgot: "Reset your password",
     reset: "Choose a new password",
   };
+  const cta = {
+    "sign-in": "Log in",
+    "sign-up": "Sign up",
+    forgot: "Send reset link",
+    reset: "Update password",
+  }[mode];
   return (
-    <div className="container-page flex justify-center py-14">
-      <Card className="w-full max-w-md p-6 sm:p-8">
-        <h1 className="text-2xl font-bold">{titles[mode]}</h1>
-        {mode === "sign-up" && (
-          <p className="mt-1 text-sm text-fg-muted">
-            Save events, keep tickets in one place, or start selling.
-          </p>
-        )}
+    <div className="flex min-h-[70dvh] items-center justify-center px-4 py-16">
+      <div className="w-full max-w-[325px] text-center">
+        <p className="font-display text-3xl font-semibold tracking-[-0.04em]">project23</p>
+        <h1 className="mt-5 text-lg font-medium">{titles[mode]}</h1>
         {state?.message ? (
-          <Alert tone="success" className="mt-6">
+          <Alert tone="success" className="mt-6 text-left">
             {state.message}
           </Alert>
         ) : (
-          <form action={formAction} className="mt-6 grid gap-4">
+          <form action={formAction} className="mt-6 grid gap-2.5 text-left">
             <input type="hidden" name="next" value={next ?? ""} />
             {mode === "sign-up" && (
-              <Field label="Full name" htmlFor="fullName" required>
-                <Input name="fullName" autoComplete="name" />
-              </Field>
+              <>
+                <label htmlFor="fullName" className="sr-only">
+                  Full name
+                </label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  autoComplete="name"
+                  placeholder="Full name"
+                  className={input}
+                  required
+                />
+              </>
             )}
             {mode !== "reset" && (
-              <Field label="Email" htmlFor="email" required>
-                <Input name="email" type="email" autoComplete="email" />
-              </Field>
+              <>
+                <label htmlFor="email" className="sr-only">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Email"
+                  className={input}
+                  required
+                />
+              </>
             )}
-            {(mode === "sign-in" || mode === "sign-up" || mode === "reset") && (
-              <Field
-                label={mode === "reset" ? "New password" : "Password"}
-                htmlFor="password"
-                required
-                hint={mode !== "sign-in" ? "At least 10 characters." : undefined}
-              >
-                <Input
+            {mode !== "forgot" && (
+              <>
+                <label htmlFor="password" className="sr-only">
+                  {mode === "reset" ? "New password" : "Password"}
+                </label>
+                <input
+                  id="password"
                   name="password"
                   type="password"
                   autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                  placeholder={mode === "sign-in" ? "Password" : "Password (10+ characters)"}
+                  className={input}
+                  required
                 />
-              </Field>
+              </>
             )}
             {mode === "reset" && (
-              <Field label="Confirm password" htmlFor="confirm" required>
-                <Input name="confirm" type="password" autoComplete="new-password" />
-              </Field>
+              <>
+                <label htmlFor="confirm" className="sr-only">
+                  Confirm password
+                </label>
+                <input
+                  id="confirm"
+                  name="confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Confirm password"
+                  className={input}
+                  required
+                />
+              </>
             )}
-            {state?.error && <Alert tone="danger">{state.error}</Alert>}
-            <Button type="submit" size="lg" loading={pending}>
-              {
-                {
-                  "sign-in": "Log in",
-                  "sign-up": "Create account",
-                  forgot: "Send reset link",
-                  reset: "Update password",
-                }[mode]
-              }
-            </Button>
+            {state?.error && (
+              <p role="alert" className="text-sm text-danger">
+                {state.error}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={pending}
+              className="mt-3 h-9 rounded-full bg-zinc-300 text-sm font-medium text-black hover:bg-white disabled:opacity-60"
+            >
+              {pending ? "Please wait…" : cta}
+            </button>
           </form>
         )}
-        <div className="mt-6 space-y-2 text-center text-sm text-fg-muted">
+        <div className="mt-6 grid gap-3 text-sm font-medium">
           {mode === "sign-in" && (
             <>
-              <p>
-                <Link className="text-accent hover:underline" href="/forgot-password">
-                  Forgot your password?
-                </Link>
-              </p>
-              <p>
-                New here?{" "}
-                <Link
-                  className="text-accent hover:underline"
-                  href={`/sign-up${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-                >
-                  Create an account
-                </Link>
-              </p>
+              <Link
+                className="hover:underline"
+                href={`/sign-up${next ? `?next=${encodeURIComponent(next)}` : ""}`}
+              >
+                Create an account
+              </Link>
+              <Link className="text-fg-muted hover:text-fg" href="/forgot-password">
+                Forgot password?
+              </Link>
             </>
           )}
           {mode === "sign-up" && (
-            <p>
-              Already have an account?{" "}
-              <Link className="text-accent hover:underline" href="/sign-in">
-                Log in
-              </Link>
-            </p>
+            <Link className="hover:underline" href="/sign-in">
+              I already have an account
+            </Link>
           )}
           {mode === "forgot" && (
-            <p>
-              <Link className="text-accent hover:underline" href="/sign-in">
-                Back to log in
-              </Link>
-            </p>
-          )}
-          <p className="text-xs">
-            Bought tickets as a guest?{" "}
-            <Link className="underline" href="/orders/lookup">
-              Find them by email
+            <Link className="hover:underline" href="/sign-in">
+              Back to log in
             </Link>
-            .
-          </p>
+          )}
+          <Link className="text-xs font-normal text-fg-muted hover:text-fg" href="/orders/lookup">
+            Bought tickets as a guest? Find them by email
+          </Link>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

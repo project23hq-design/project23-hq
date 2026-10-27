@@ -629,3 +629,127 @@ export async function acceptInvitationAction(_: ActionState, f: FormData): Promi
     .single();
   redirect(`/organizer/${org?.slug ?? ""}`);
 }
+
+export interface CreateEventInput {
+  org: string;
+  mode: "tickets" | "rsvp";
+  title: string;
+  slug: string;
+  summary?: string;
+  description?: string;
+  categoryId: string;
+  startsLocal: string;
+  endsLocal: string;
+  timezone: string;
+  format: "in_person" | "online";
+  venueName?: string;
+  addressLine?: string;
+  cityId?: string;
+  capacity: number;
+  visibility: "public" | "unlisted";
+  tickets: { name: string; price: string; quantity: number; admissionsPerUnit: number }[];
+}
+
+/** One-page create (reference-style): event + ticket types in one step, then the editor. */
+export async function createEventFullAction(
+  input: CreateEventInput,
+): Promise<{ eventId?: string; orgId?: string; error?: string }> {
+  const { supabase, user, org } = await requireOrg(input.org, ["owner", "manager"]);
+  if (!(await rateLimit("event-create", 30, 3600, user.id)))
+    return { error: engineErrorMessage("rate_limited") };
+  const basics = eventBasicsSchema.safeParse({
+    title: input.title,
+    slug: input.slug,
+    summary: input.summary,
+    categoryId: input.categoryId,
+    tags: [],
+  });
+  if (!basics.success) return firstIssue(basics.error);
+  const sched = eventScheduleSchema.safeParse({
+    format: input.format,
+    venueName: input.venueName,
+    addressLine: input.addressLine,
+    cityId: input.cityId || undefined,
+    timezone: input.timezone,
+    startsLocal: input.startsLocal,
+    endsLocal: input.endsLocal,
+    capacity: input.capacity,
+    visibility: input.visibility,
+  });
+  if (!sched.success) return firstIssue(sched.error);
+  if (input.tickets.length === 0) return { error: "Add at least one ticket." };
+  const tickets = [];
+  for (const [i, t] of input.tickets.entries()) {
+    const price = input.mode === "rsvp" ? 0 : parseMoneyToMinor(t.price || "0");
+    if (price === null) return { error: `Ticket ${i + 1}: enter a valid price in naira.` };
+    const p = ticketTypeSchema.safeParse({
+      name: t.name,
+      kind: price === 0 ? "free" : t.admissionsPerUnit > 1 ? "group" : "general",
+      priceMinor: price,
+      quantityTotal: t.quantity,
+      admissionsPerUnit: t.admissionsPerUnit,
+      minPerOrder: 1,
+      maxPerOrder: Math.min(10, Math.max(1, t.quantity)),
+      visibility: "public",
+      accessCode: "",
+      isActive: true,
+    });
+    if (!p.success) return { error: `Ticket ${i + 1}: ${p.error.issues[0]?.message ?? "invalid"}` };
+    tickets.push(p.data);
+  }
+  const v = { ...basics.data, ...sched.data };
+  const { data: city } = v.cityId
+    ? await supabase.from("cities").select("region_id").eq("id", v.cityId).single()
+    : { data: null };
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      organization_id: org.id,
+      created_by: user.id,
+      title: v.title,
+      slug: v.slug,
+      summary: v.summary ?? null,
+      category_id: v.categoryId,
+      description_html: input.description?.trim() ? textToHtml(input.description) : null,
+      format: v.format,
+      venue_name: v.venueName ?? null,
+      address_line: v.addressLine ?? null,
+      city_id: v.cityId ?? null,
+      region_id: city?.region_id ?? null,
+      timezone: v.timezone,
+      starts_at: zonedLocalToUtc(v.startsLocal, v.timezone),
+      ends_at: zonedLocalToUtc(v.endsLocal, v.timezone),
+      capacity: v.capacity,
+      visibility: v.visibility,
+    })
+    .select("id")
+    .single();
+  if (error)
+    return {
+      error: error.code === "23505" ? "That event URL is taken. Try another." : fail(error)?.error,
+    };
+  await supabase.from("event_private").insert({ event_id: data.id });
+  const { error: tErr } = await supabase.from("ticket_types").insert(
+    tickets.map((t, i) => ({
+      event_id: data.id,
+      organization_id: org.id,
+      name: t.name,
+      kind: t.kind,
+      price_minor: t.priceMinor,
+      quantity_total: t.quantityTotal,
+      admissions_per_unit: t.admissionsPerUnit,
+      min_per_order: t.minPerOrder,
+      max_per_order: t.maxPerOrder,
+      visibility: "public",
+      sort_order: i,
+    })),
+  );
+  if (tErr)
+    return {
+      eventId: data.id,
+      orgId: org.id,
+      error: `Event saved, but tickets couldn't be added: ${tErr.message}`,
+    };
+  revalidatePath(`/organizer/${org.slug}/events`);
+  return { eventId: data.id, orgId: org.id };
+}

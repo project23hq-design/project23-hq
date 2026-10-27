@@ -104,7 +104,7 @@ export default async function PromoterPage() {
   return (
     <div className="container-page space-y-10 pt-8">
       <div>
-        <h1 className="text-3xl font-bold">Promoter earnings</h1>
+        <h1 className="text-3xl font-medium">Promoter earnings</h1>
         <p className="mt-1 max-w-2xl text-fg-muted">
           Share events with your unique link and earn a commission on verified ticket sales. This is
           an earnings balance kept in Project23&apos;s ledger — not a bank account or stored-value
@@ -134,7 +134,7 @@ export default async function PromoterPage() {
       )}
 
       <section>
-        <h2 className="mb-4 text-xl font-bold">Your programs</h2>
+        <h2 className="mb-4 text-xl font-medium">Your programs</h2>
         {d.enrollments.length === 0 ? (
           <p className="text-fg-muted">
             You haven&apos;t joined a program yet — browse open programs below.
@@ -226,7 +226,7 @@ export default async function PromoterPage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-bold">Open programs</h2>
+        <h2 className="mb-4 text-xl font-medium">Open programs</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {(programs ?? [])
             .filter(
@@ -368,7 +368,7 @@ export default async function PromoterPage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-bold">Commission history</h2>
+        <h2 className="mb-4 text-xl font-medium">Commission history</h2>
         {!d.commissions.length ? (
           <p className="text-fg-muted">
             Commissions appear here after verified, paid orders through your links.

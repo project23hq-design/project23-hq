@@ -19,7 +19,7 @@ export default async function GateHome() {
   }[];
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="text-2xl font-bold">Choose an event to check in</h1>
+      <h1 className="text-2xl font-medium">Choose an event to check in</h1>
       {events.length === 0 ? (
         <div className="mt-6">
           <EmptyState icon={<ScanLine />} title="No events assigned">

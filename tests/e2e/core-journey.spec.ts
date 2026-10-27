@@ -30,24 +30,26 @@ test("organizer creates an event with Early Bird and Regular tickets and submits
     "/organizer/osun-sound-collective/events/new",
   );
   await page.goto("/organizer/osun-sound-collective/events/new");
+  // One-page create (reference-style): title, dates, details, first ticket, then "Create Event".
   await page.getByLabel("Event title").fill(title);
   await expect(page.getByLabel("Event URL")).toHaveValue(slug);
-  await page.getByLabel("Category").selectOption({ label: "Music" });
-  await page.getByRole("button", { name: "Create draft" }).click();
-  await page.waitForURL(/tab=details/);
-  eventId = page.url().split("/events/")[1]!.split("?")[0]!;
-
+  const d = new Date(Date.now() + 20 * 86400_000).toISOString().slice(0, 10);
+  await page.getByLabel("Start").fill(`${d}T15:00`);
+  await page.getByLabel("End").fill(`${d}T21:00`);
+  await page.getByRole("button", { name: "Add Description" }).click();
   await page
     .getByLabel("Description")
     .fill("An afternoon of live jazz on the grass with food vendors. Bring a mat!");
+  await page.getByLabel("Category").selectOption({ label: "Music" });
   await page.getByLabel("Venue name").fill("Riverside Lawn (fictional)");
   await page.getByLabel("City", { exact: true }).selectOption({ label: "Osogbo" });
-  const d = new Date(Date.now() + 20 * 86400_000).toISOString().slice(0, 10);
-  await page.getByLabel("Starts (local)").fill(`${d}T15:00`);
-  await page.getByLabel("Ends (local)").fill(`${d}T21:00`);
-  await page.getByLabel("Total capacity (people)").fill("100");
-  await page.getByRole("button", { name: "Save event" }).click();
-  await expect(page.getByText("Event saved.")).toBeVisible();
+  await page.getByLabel("Capacity (people)").fill("100");
+  await page.getByLabel("Ticket name").fill("Early Bird");
+  await page.getByLabel("Price (₦)").fill("5000");
+  await page.getByLabel("Quantity").fill("2");
+  await page.getByRole("button", { name: "Create Event" }).click();
+  await page.waitForURL(/tab=publish/);
+  eventId = page.url().split("/events/")[1]!.split("?")[0]!;
 
   await page.goto(`/organizer/osun-sound-collective/events/${eventId}?tab=tickets`);
   const add = async (
@@ -68,8 +70,6 @@ test("organizer creates an event with Early Bird and Regular tickets and submits
     await form.getByRole("button", { name: "Add ticket type" }).click();
     await expect(page.getByText("Ticket type added.")).toBeVisible();
   };
-  await add("Early Bird", "early_bird", "5000", "2");
-  await page.reload();
   await add("Regular", "regular", "8000", "50", "Early Bird");
 
   await page.goto(`/organizer/osun-sound-collective/events/${eventId}?tab=staff`);
@@ -128,7 +128,6 @@ test("a guest discovers the event, buys two Early Bird tickets and gets two uniq
     .first()
     .click();
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
-  await expect(page.getByText("Opens after Early Bird")).toBeVisible(); // Regular is locked behind Early Bird
   orderId = await buyTickets(page, slug, "Early Bird", 2, {
     name: "Guest Buyer",
     email: buyerEmail,
@@ -140,9 +139,13 @@ test("a guest discovers the event, buys two Early Bird tickets and gets two uniq
   await expect(page.getByRole("heading", { name: "You're in!" })).toBeVisible();
   const refs = await page.locator("p.font-mono").allTextContents();
   expect(new Set(refs.filter((r) => r.startsWith("T-"))).size).toBe(2);
-  // Early Bird sold out -> Regular opens
+  // Early Bird sold out -> Regular opens (dependency evaluated server-side)
   await page.goto(`/events/${slug}`);
-  await expect(page.getByRole("button", { name: "Add one Regular", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Buy tickets from ₦8,000" })).toBeVisible();
+  await page.getByRole("button", { name: "Buy tickets from ₦8,000" }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("button", { name: "Add one Regular", exact: true }),
+  ).toBeVisible();
 });
 
 test("tickets are emailed once and can be retrieved securely without an account", async ({

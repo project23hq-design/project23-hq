@@ -15,7 +15,7 @@ export default async function AccountPage() {
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-medium">
           Hi{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
         </h1>
         <p className="mt-1 text-fg-muted">

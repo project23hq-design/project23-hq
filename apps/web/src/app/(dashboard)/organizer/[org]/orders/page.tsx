@@ -50,7 +50,7 @@ export default async function OrgOrders({
   const hiddenOrg = <input type="hidden" name="org" value={org.slug} />;
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Orders</h1>
+      <h1 className="text-3xl font-medium">Orders</h1>
       {!!requests?.length && (
         <Card className="border-warning/40">
           <CardHeader>

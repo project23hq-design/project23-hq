@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
-import { Button } from "@project23/ui";
+import { Bookmark, Share } from "lucide-react";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { toggleFavoriteAction } from "./actions";
+
+const iconBtn =
+  "inline-flex size-9 items-center justify-center rounded-full text-fg hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 
 export function FavoriteButton({
   eventId,
@@ -19,19 +21,41 @@ export function FavoriteButton({
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <Button
-      variant="secondary"
-      size="sm"
+    <button
+      className={iconBtn}
       aria-pressed={on}
-      loading={pending}
+      aria-label={on ? "Saved" : "Save event"}
+      disabled={pending}
       onClick={() =>
         signedIn
           ? start(async () => setOn(await toggleFavoriteAction(eventId, !on)))
           : router.push(`/sign-in?next=${location.pathname}`)
       }
     >
-      <Heart className={on ? "fill-accent text-accent" : ""} /> {on ? "Saved" : "Save"}
-    </Button>
+      <Bookmark className={`size-[18px] ${on ? "fill-fg" : ""}`} />
+    </button>
+  );
+}
+
+export function ShareButton({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      className={iconBtn}
+      aria-label={copied ? "Link copied" : "Share event"}
+      onClick={async () => {
+        const url = location.href.split("?")[0]!;
+        if (navigator.share) {
+          await navigator.share({ title, url }).catch(() => undefined);
+          return;
+        }
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      <Share className="size-[18px]" />
+    </button>
   );
 }
 

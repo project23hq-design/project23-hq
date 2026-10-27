@@ -74,15 +74,19 @@ export async function buyTickets(
   buyer: { name: string; email: string },
 ) {
   await page.goto(`/events/${slug}`);
+  await page
+    .getByRole("button", { name: /^(Buy tickets from|Get free tickets|Get tickets)/ })
+    .click();
+  const dialog = page.getByRole("dialog");
   for (let i = 0; i < qty; i++)
-    await page.getByRole("button", { name: `Add one ${ticketName}`, exact: true }).click();
-  const cta = page.getByRole("button", { name: /^(Continue|Get free tickets)/ });
-  await expect(cta).toBeEnabled();
-  await cta.click();
-  await page.getByLabel("Full name").fill(buyer.name);
-  await page.getByLabel("Email").fill(buyer.email);
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: /Continue to payment|Confirm free order/ }).click();
+    await dialog.getByRole("button", { name: `Add one ${ticketName}`, exact: true }).click();
+  const checkout = dialog.getByRole("button", { name: "Checkout" });
+  await expect(checkout).toBeEnabled();
+  await checkout.click();
+  await dialog.getByLabel("Full name").fill(buyer.name);
+  await dialog.getByLabel("Email").fill(buyer.email);
+  await dialog.getByRole("checkbox").check();
+  await dialog.getByRole("button", { name: /Continue to payment|Confirm free order/ }).click();
   await page.waitForURL(/\/checkout\//);
   return page.url().split("/checkout/")[1]!.split("?")[0]!;
 }

@@ -10,7 +10,7 @@ export default function LookupPage() {
   return (
     <div className="container-page flex justify-center py-16">
       <Card className="w-full max-w-md p-6">
-        <h1 className="text-2xl font-bold">Find my tickets</h1>
+        <h1 className="text-2xl font-medium">Find my tickets</h1>
         <p className="mt-2 text-sm text-fg-muted">
           Bought tickets without an account? Enter the email you used at checkout and we&apos;ll
           send you a secure link.

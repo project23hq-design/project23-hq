@@ -86,14 +86,14 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-in-fade" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed z-50 overflow-y-auto border border-line bg-surface-1 p-6 shadow-pop focus:outline-none",
+          "fixed z-50 overflow-y-auto border border-white/[0.06] bg-[#111113] p-6 shadow-pop focus:outline-none",
           placement,
           className,
         )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <DialogPrimitive.Title className="font-display text-xl font-semibold">
+            <DialogPrimitive.Title className="font-display text-lg font-medium">
               {title}
             </DialogPrimitive.Title>
             {description ? (
@@ -125,10 +125,7 @@ export function TabsList({
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
-      className={cn(
-        "inline-flex gap-1 rounded-full border border-line bg-surface-1 p-1",
-        className,
-      )}
+      className={cn("inline-flex gap-1 rounded-full bg-white/[0.08] p-1", className)}
       {...props}
     />
   );
@@ -140,7 +137,7 @@ export function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "rounded-full px-4 py-1.5 text-sm font-medium text-fg-muted transition-colors data-[state=active]:bg-surface-3 data-[state=active]:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "rounded-full px-3 py-1 text-sm font-medium text-fg/60 transition-colors data-[state=active]:bg-white/[0.12] data-[state=active]:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
       {...props}
@@ -162,7 +159,7 @@ export function DropdownMenuContent({
         sideOffset={8}
         align="end"
         className={cn(
-          "z-50 min-w-52 rounded-2xl border border-line bg-surface-1 p-1.5 shadow-pop data-[state=open]:animate-in-fade",
+          "z-50 min-w-52 rounded-xl border border-white/[0.06] bg-[#141416] p-1.5 shadow-pop data-[state=open]:animate-in-fade",
           className,
         )}
         {...props}
@@ -177,7 +174,7 @@ export function DropdownMenuItem({
   return (
     <DropdownPrimitive.Item
       className={cn(
-        "flex cursor-pointer select-none items-center gap-2 rounded-xl px-3 py-2 text-sm outline-none data-[highlighted]:bg-surface-2",
+        "flex cursor-pointer select-none items-center gap-2 rounded-xl px-3 py-2 text-sm outline-none data-[highlighted]:bg-white/[0.06]",
         className,
       )}
       {...props}

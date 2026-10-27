@@ -17,7 +17,7 @@ export default async function Saved() {
     : { data: [] };
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">Saved events</h1>
+      <h1 className="mb-6 text-3xl font-medium">Saved events</h1>
       {!data?.length ? (
         <EmptyState title="Nothing saved yet">Tap “Save” on any event to keep it here.</EmptyState>
       ) : (

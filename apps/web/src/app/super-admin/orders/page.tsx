@@ -56,7 +56,7 @@ export default async function AdminOrders({
     : [];
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Order lookup</h1>
+      <h1 className="text-3xl font-medium">Order lookup</h1>
       <form className="flex gap-2">
         <Input
           name="q"

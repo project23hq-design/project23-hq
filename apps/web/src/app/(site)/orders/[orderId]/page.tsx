@@ -12,7 +12,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderId:
   if (!bundle) notFound();
   return (
     <div className="container-page max-w-3xl pt-10">
-      <h1 className="text-3xl font-bold">{bundle.event?.title ?? "Your order"}</h1>
+      <h1 className="text-3xl font-medium">{bundle.event?.title ?? "Your order"}</h1>
       {bundle.event?.status === "cancelled" && (
         <Alert tone="danger" className="mt-4">
           This event was cancelled. Paid orders are refunded automatically.

@@ -10,7 +10,7 @@ export default async function NewOrg() {
   const { data: cities } = await supabase.from("cities").select("id, name").order("sort_order");
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-3xl font-bold">Create your organization</h1>
+      <h1 className="text-3xl font-medium">Create your organization</h1>
       <p className="mt-2 text-fg-muted">
         This is your public organizer profile. Project23 reviews new organizers before their first
         event goes live; payouts are enabled separately after bank and business verification.

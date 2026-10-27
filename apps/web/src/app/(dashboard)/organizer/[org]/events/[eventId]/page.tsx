@@ -100,7 +100,7 @@ export default async function EventEditor({
             </Link>{" "}
             /
           </p>
-          <h1 className="text-2xl font-bold sm:text-3xl">{e.title}</h1>
+          <h1 className="text-2xl font-medium sm:text-3xl">{e.title}</h1>
           <p className="mt-1 text-sm text-fg-muted">
             {formatEventRange(e.starts_at, e.ends_at, e.timezone)}
           </p>

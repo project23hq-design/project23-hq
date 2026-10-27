@@ -22,7 +22,7 @@ export default async function TestPaymentPage({
       <Card className="w-full max-w-md space-y-5 p-6">
         <div className="flex items-center gap-3">
           <FlaskConical className="size-6 text-warning" aria-hidden />
-          <h1 className="text-xl font-bold">Test payment</h1>
+          <h1 className="text-xl font-medium">Test payment</h1>
         </div>
         <Alert tone="warning" title="Simulated provider">
           No money moves. This page stands in for Paystack&apos;s hosted checkout during local

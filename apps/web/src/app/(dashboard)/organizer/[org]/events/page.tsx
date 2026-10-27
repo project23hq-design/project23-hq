@@ -24,7 +24,7 @@ export default async function OrgEvents({ params }: { params: Promise<{ org: str
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Events</h1>
+        <h1 className="text-3xl font-medium">Events</h1>
         {org.role !== "finance" && (
           <Button asChild>
             <Link href={`/organizer/${org.slug}/events/new`}>Create event</Link>

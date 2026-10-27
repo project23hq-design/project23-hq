@@ -37,7 +37,7 @@ export default async function DevMail({
   return (
     <div className="container-page grid gap-6 pt-8 lg:grid-cols-[340px_1fr]">
       <div>
-        <h1 className="mb-4 text-2xl font-bold">Captured email</h1>
+        <h1 className="mb-4 text-2xl font-medium">Captured email</h1>
         <ul className="space-y-1 text-sm">
           {items.map((m) => (
             <li key={m.id}>

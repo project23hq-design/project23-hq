@@ -28,7 +28,7 @@ export default async function AdminEvents() {
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold">Events</h1>
+        <h1 className="text-3xl font-medium">Events</h1>
         {p23 && (
           <Link className="text-sm text-accent" href={`/organizer/${p23.slug}/events/new`}>
             + Create a Project23 event (shared engine; requires Project23 org membership)
@@ -36,7 +36,7 @@ export default async function AdminEvents() {
         )}
       </div>
       <section>
-        <h2 className="mb-4 text-xl font-bold">Review queue ({queue?.length ?? 0})</h2>
+        <h2 className="mb-4 text-xl font-medium">Review queue ({queue?.length ?? 0})</h2>
         <div className="space-y-4">
           {queue?.map((e) => {
             const org = e.organizations as unknown as { name: string; approval_status: string };
@@ -96,7 +96,7 @@ export default async function AdminEvents() {
         </div>
       </section>
       <section>
-        <h2 className="mb-4 text-xl font-bold">Live events</h2>
+        <h2 className="mb-4 text-xl font-medium">Live events</h2>
         <Table>
           <thead>
             <tr>

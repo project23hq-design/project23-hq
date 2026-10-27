@@ -15,7 +15,7 @@ export default async function Security({
   const { data: roles } = await supabase.rpc("my_platform_roles");
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-3xl font-bold">Security</h1>
+      <h1 className="text-3xl font-medium">Security</h1>
       {sp.mfa === "required" && (
         <Alert tone="warning" title="Two-factor authentication required">
           Platform administration requires an authenticator-app verified session.

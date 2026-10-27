@@ -50,7 +50,7 @@ export default async function OrgOverview({ params }: { params: Promise<{ org: s
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold">{org.name}</h1>
+        <h1 className="text-3xl font-medium">{org.name}</h1>
         {can(org.role, "events.manage") && (
           <Button asChild>
             <Link href={`/organizer/${org.slug}/events/new`}>Create event</Link>
