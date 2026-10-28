@@ -1,12 +1,12 @@
 # Project23 — Deployment Setup Guide
 
-Project23 goes live as one Next.js website on Vercel, talking to a hosted Supabase database, with Paystack for payments and Resend for email. Expect roughly $45–65 a month to start, plus Paystack's cut of each sale. Paystack's business verification is the slowest part (days to weeks), so start it first.
+Project23 goes live as one Next.js website on Vercel or Netlify, talking to a hosted Supabase database, with Paystack for payments and Resend for email. Expect roughly $45–65 a month to start, plus Paystack's cut of each sale. Paystack's business verification is the slowest part (days to weeks), so start it first.
 
 ## Overview
 
 | Service  | What it does for Project23                              | Plan                               | Approx. cost                                                                    |
 | -------- | ------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------- |
-| Vercel   | Hosts the website and API routes                        | Pro (Hobby is non-commercial only) | ~$20/month per team member                                                      |
+| Vercel or Netlify | Hosts the website and API routes | Pro on either (needed for a London server) | ~$20/month                                                      |
 | Supabase | Database, logins, MFA, image storage, the job scheduler | Pro                                | ~$25/month (point-in-time backups are a paid add-on)                            |
 | Paystack | Card and bank payments, refunds, payouts                | Pay as you go                      | ~1.5% + ₦100 per local payment, capped at ₦2,000 (₦100 waived under ₦2,500) |
 | Resend   | Ticket and order emails                                 | Free to start                      | Free up to ~3,000 emails/month, then ~$20/month                                 |
@@ -20,7 +20,7 @@ Order to do things in:
 2. Buy the domain (Step 3).
 3. Set up the Supabase database and load the reference data (Step 1).
 4. Set up Resend email on the domain (Step 4).
-5. Deploy to Vercel and start the scheduler (Step 5).
+5. Deploy to Vercel or Netlify and start the scheduler (Step 5).
 6. Create your admin account and turn on MFA (Step 6).
 7. Test everything with Paystack test keys, then switch to live keys (Step 7).
 
@@ -29,7 +29,7 @@ Order to do things in:
 **Accounts**
 
 - [x] GitHub repo (`project23hq-design/project23-hq`)
-- [ ] Vercel account, signed in with that GitHub
+- [ ] Vercel or Netlify account, signed in with that GitHub
 - [ ] Supabase account
 - [ ] Paystack business account
 - [ ] Resend account
@@ -43,7 +43,7 @@ Order to do things in:
 - [ ] Written OK from Paystack that you can collect for organizers and pay them out later (the "marketplace" model). If they say no, the code needs switching to Paystack subaccount splits.
 - [ ] Paystack Transfers turned on (needed for automatic organizer payouts; without it, payouts stay manual)
 
-**Keys and secrets** (all go into Vercel, never into git)
+**Keys and secrets** (all go into your host's settings, never into git)
 
 - [ ] Supabase project URL
 - [ ] Supabase anon (public) key
@@ -89,7 +89,7 @@ You end this step with an empty production database that has all the tables and 
 8. Authentication → Multi-Factor: TOTP (authenticator app) enabled. The admin area refuses to open without it.
 9. Authentication → Emails → SMTP Settings: turn on custom SMTP after Step 4 (Resend). Supabase's built-in email only sends a few emails an hour, so sign-ups will stall without it.
 10. Database → Extensions: turn on `pg_cron` and `pg_net`. Step 5 uses them for the job scheduler.
-11. Project Settings → API: copy the Project URL, the `anon` public key and the `service_role` key into your password manager. The service role key bypasses all security rules, so it only ever goes into Vercel.
+11. Project Settings → API: copy the Project URL, the `anon` public key and the `service_role` key into your password manager. The service role key bypasses all security rules, so it only ever goes into your host's settings (Vercel or Netlify).
 
 ## Step 2: Paystack (payments)
 
@@ -109,24 +109,24 @@ You end this step with test keys that work today and live keys once Paystack app
    - Copy the Live Secret Key (`sk_live_…`).
    - Live Webhook URL: the same address.
 
-In Vercel (Step 5) set `PAYMENT_PROVIDER=paystack` and `PAYSTACK_SECRET_KEY` to the test key first. The app reads the key prefix and marks orders as test or live by itself. The public key (`pk_…`) is not needed.
+In your host's settings (Step 5) set `PAYMENT_PROVIDER=paystack` and `PAYSTACK_SECRET_KEY` to the test key first. The app reads the key prefix and marks orders as test or live by itself. The public key (`pk_…`) is not needed.
 
 ## Step 3: Domain and DNS
 
-You end this step owning the domain and knowing where to add DNS records. Vercel and Resend each give you a few records to paste in.
+You end this step owning the domain and knowing where to add DNS records. Your host (Vercel or Netlify) and Resend each give you a few records to paste in.
 
 1. Buy the domain. A `.ng` or `.com.ng` needs a NiRA-accredited registrar (e.g. Whogohost). A `.com` or `.app` works at Namecheap or Cloudflare.
 2. Keep the registrar's DNS page open. You'll add these records in Steps 4 and 5:
 
 | Record                          | For                          | Where the value comes from              |
 | ------------------------------- | ---------------------------- | --------------------------------------- |
-| A on `@` (root domain)          | The website                  | Vercel → Project → Settings → Domains   |
-| CNAME on `www`                  | The website                  | Vercel, same page                       |
+| A on `@` (root domain)          | The website                  | Your host's domain settings (Step 5)    |
+| CNAME on `www`                  | The website                  | Your host, same page                    |
 | MX and TXT (SPF) on `send`      | Sending email                | Resend → Domains                        |
 | TXT on `resend._domainkey` (DKIM) | Proving email is yours     | Resend → Domains                        |
 | TXT on `_dmarc`                 | Spam protection              | Type it yourself: `v=DMARC1; p=none;`   |
 
-Copy record values exactly as Vercel and Resend show them, since they can differ per account.
+Copy record values exactly as your host and Resend show them, since they can differ per account.
 
 ## Step 4: Resend (email)
 
@@ -145,22 +145,24 @@ You end this step able to send ticket emails and login emails from your own doma
    - Sender email: `no-reply@YOUR-DOMAIN`
    - Sender name: `Project23`
 
-In Vercel (Step 5) set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` to the `project23-app` key, and `EMAIL_FROM` to `Project23 <tickets@YOUR-DOMAIN>`.
+In your host's settings (Step 5) set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` to the `project23-app` key, and `EMAIL_FROM` to `Project23 <tickets@YOUR-DOMAIN>`.
 
-## Step 5: Vercel (hosting) and the job scheduler
+## Step 5: Hosting (Vercel or Netlify) and the job scheduler
 
 You end this step with the site live on your domain and a scheduler running every minute. The scheduler sends ticket emails, expires unpaid holds, runs refunds and payouts, and re-checks payments. Without it, buyers pay but never get their tickets by email.
 
-### 5a. Create the project
+Pick one host. Either works, and neither is faster for Nigerian users: every page waits on the database in London, so what matters is putting the website's server in London too.
 
-1. vercel.com → Add New → Project → import `project23hq-design/project23-hq`. If the repo isn't listed, install the Vercel GitHub app on the `project23hq-design` account.
-2. On the import screen:
-   - Framework: Next.js
-   - Root Directory: `apps/web`
-   - Leave the build and install commands on default. Vercel picks up pnpm from the lockfile.
-3. Don't click Deploy yet. Add the environment variables first (5b).
+|                                | Vercel                                          | Netlify                                                   |
+| ------------------------------ | ----------------------------------------------- | --------------------------------------------------------- |
+| Plan you need                  | Pro, ~$20/month per member (free plan is non-commercial) | Pro, ~$20/month (the free plan's servers are in Ohio, USA) |
+| Server in London               | Yes (`lhr1`)                                    | Yes (`lhr`), Pro plan only                                |
+| Time limit per request         | 60 seconds (set by the app)                     | 60 seconds (fixed)                                        |
+| Next.js support                | Made by the Next.js company; new versions first | Through Netlify's adapter; this repo not yet tried there  |
 
-### 5b. Environment variables
+Prices are approximate, so check the pricing pages. Both may decline Nigerian Naira cards; a dollar card (domiciliary account, Grey, Chipper) usually works.
+
+### 5a. Make the secrets and list the variables
 
 Make the three secrets on your Mac. Run this three times and use a different output for each:
 
@@ -168,37 +170,60 @@ Make the three secrets on your Mac. Run this three times and use a different out
 openssl rand -base64 48
 ```
 
-Add each row below in Vercel → Settings → Environment Variables, ticking **Production** only.
+These are the environment variables for either host. Steps 5b and 5c say where they go.
 
-| Name                            | Value                                                  |
-| ------------------------------- | ------------------------------------------------------ |
-| `APP_ENV`                       | `production`                                           |
-| `NEXT_PUBLIC_APP_URL`           | `https://YOUR-DOMAIN` (no trailing slash)              |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase Project URL                                   |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key                                      |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service_role key (tick Sensitive)             |
-| `PAYMENT_PROVIDER`              | `paystack`                                             |
-| `PAYSTACK_SECRET_KEY`           | `sk_test_…` now, `sk_live_…` at launch (Sensitive)     |
-| `EMAIL_PROVIDER`                | `resend`                                               |
-| `RESEND_API_KEY`                | Resend `project23-app` key (Sensitive)                 |
-| `EMAIL_FROM`                    | `Project23 <tickets@YOUR-DOMAIN>`                      |
-| `TICKET_QR_SECRET`              | Secret 1 (Sensitive)                                   |
-| `COOKIE_SIGNING_SECRET`         | Secret 2 (Sensitive)                                   |
-| `JOB_RUNNER_SECRET`             | Secret 3 (Sensitive)                                   |
-| `LOG_LEVEL`                     | `info`                                                 |
+| Name                            | Value                                     | Secret? |
+| ------------------------------- | ----------------------------------------- | ------- |
+| `APP_ENV`                       | `production`                              |         |
+| `NEXT_PUBLIC_APP_URL`           | `https://YOUR-DOMAIN` (no trailing slash) |         |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase Project URL                      |         |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key                         |         |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service_role key                 | Yes     |
+| `PAYMENT_PROVIDER`              | `paystack`                                |         |
+| `PAYSTACK_SECRET_KEY`           | `sk_test_…` now, `sk_live_…` at launch    | Yes     |
+| `EMAIL_PROVIDER`                | `resend`                                  |         |
+| `RESEND_API_KEY`                | Resend `project23-app` key                | Yes     |
+| `EMAIL_FROM`                    | `Project23 <tickets@YOUR-DOMAIN>`         |         |
+| `TICKET_QR_SECRET`              | Secret 1                                  | Yes     |
+| `COOKIE_SIGNING_SECRET`         | Secret 2                                  | Yes     |
+| `JOB_RUNNER_SECRET`             | Secret 3                                  | Yes     |
+| `LOG_LEVEL`                     | `info`                                    |         |
 
-Don't set `TEST_PROVIDER_SECRET` in production. **Never change `TICKET_QR_SECRET` after launch:** every QR code already issued would stop working. The app refuses to start if a value is missing, so check the deploy log if the site shows an error.
+Don't set `TEST_PROVIDER_SECRET` in production. **Never change `TICKET_QR_SECRET` after launch:** every QR code already issued would stop working. The app refuses to start if a value is missing, so check the deploy log if the site shows an error. If you change any `NEXT_PUBLIC_` value later, redeploy, as they're baked in at build time.
 
-### 5c. Deploy and connect the domain
+### 5b. Option A: Vercel
 
-1. Settings → Functions → Region: London (`lhr1`), next to the database.
-2. Deploy. When it finishes, open `https://…vercel.app/api/health` and `/api/ready`. Both should load without an error.
-3. Settings → Domains → add `YOUR-DOMAIN` and `www.YOUR-DOMAIN`. Add the A and CNAME records Vercel shows at your registrar. Vercel issues the HTTPS certificate by itself.
-4. If you change any `NEXT_PUBLIC_` value later, redeploy, as they're baked in at build time.
+1. vercel.com → Add New → Project → import `project23hq-design/project23-hq`. If the repo isn't listed, install the Vercel GitHub app on the `project23hq-design` account.
+2. On the import screen:
+   - Framework: Next.js
+   - Root Directory: `apps/web`
+   - Leave the build and install commands on default. Vercel picks up pnpm from the lockfile.
+3. Before deploying, add every variable from 5a under Environment Variables, ticking **Production** only. Tick Sensitive on the rows marked Yes.
+4. Settings → Functions → Region: London (`lhr1`).
+5. Deploy. When it finishes, open `https://…vercel.app/api/health` and `/api/ready`. Both should load without an error.
+6. Settings → Domains → add `YOUR-DOMAIN` and `www.YOUR-DOMAIN`. Add the DNS records Vercel shows at your registrar. Vercel issues the HTTPS certificate by itself.
+
+### 5c. Option B: Netlify
+
+1. Upgrade your Netlify team to Pro first. Without it you can't move the server to London.
+2. app.netlify.com → Add new project → Import an existing project → GitHub → `project23hq-design/project23-hq`. If the repo isn't listed, give the Netlify GitHub app access to the `project23hq-design` account.
+3. Build settings (Netlify may offer to pick the app from the monorepo; choose `apps/web`):
+   - Base directory: leave empty
+   - Package directory: `apps/web`
+   - Build command: `pnpm --filter @project23/web build`
+   - Publish directory: `apps/web/.next`
+
+   Netlify spots Next.js and adds its Next.js adapter by itself.
+
+4. Before deploying, Project configuration → Environment variables: add every variable from 5a with scope All. Tick "Contains secret values" on the rows marked Yes. Also add `NODE_VERSION` = `22`.
+5. Cloud compute → Functions → Region: EU (London) `lhr`.
+6. Deploy. When it finishes, open `https://…netlify.app/api/health` and `/api/ready`. Both should load without an error.
+7. Sign in on the `…netlify.app` address and open `/organizer` and `/super-admin`. Netlify runs the app's sign-in check (`proxy.ts`) in a slightly different way from Vercel, so make sure you're let in and sent to sign-in when signed out.
+8. Domain management → Add a domain → `YOUR-DOMAIN`. Add the DNS records Netlify shows at your registrar. Netlify issues the HTTPS certificate by itself.
 
 ### 5d. Start the scheduler
 
-Vercel Cron can't be used, because it sends GET requests and the tick endpoint only accepts POST. Use Supabase's built-in cron instead (you turned on `pg_cron` and `pg_net` in Step 1). In Supabase → SQL Editor, run this once, with your real secret and domain:
+Use Supabase's built-in cron for this, whichever host you picked. (Vercel Cron can't be used, because it sends GET requests and the tick endpoint only accepts POST.) You turned on `pg_cron` and `pg_net` in Step 1. In Supabase → SQL Editor, run this once, with your real secret and domain:
 
 ```sql
 select vault.create_secret('PASTE_JOB_RUNNER_SECRET', 'job_runner_secret');
@@ -266,7 +291,7 @@ You end this step knowing every flow works on the real site with fake money, the
 Only once Paystack has activated the business, confirmed the marketplace model in writing, and the legal checks are done.
 
 1. Paystack (Test mode off) → set the live webhook URL to `https://YOUR-DOMAIN/api/webhooks/paystack`.
-2. Vercel → change `PAYSTACK_SECRET_KEY` to the `sk_live_…` key → Redeploy.
+2. In your host's environment variables, change `PAYSTACK_SECRET_KEY` to the `sk_live_…` key, then redeploy.
 3. Make a ₦100 ticket, buy it with your own card, check the email and the gate scan, then refund it.
 4. Unlist or cancel the test events from 7a so the public never sees them.
 
@@ -276,7 +301,7 @@ Once live, the routine is: push code to deploy, check the jobs page daily, and r
 
 **Shipping updates**
 
-- Push to `main` on GitHub and Vercel deploys automatically.
+- Push to `main` on GitHub and your host deploys automatically.
 - If the change adds a file in `supabase/migrations`, run `pnpm exec supabase db push` before the deploy goes out.
 
 **Keeping an eye on it**
@@ -284,13 +309,13 @@ Once live, the routine is: push code to deploy, check the jobs page daily, and r
 - Daily: `/super-admin/jobs` should have no dead jobs or failed emails.
 - Weekly: compare the Paystack balance with `/super-admin/finance`.
 - Set up a free uptime check (e.g. Better Stack or UptimeRobot) on `https://YOUR-DOMAIN/api/ready`.
-- Errors show in Vercel → Logs. Each request carries a correlation ID you can search for.
+- Errors show in your host's logs (Vercel → Logs, or Netlify → Logs → Functions). Each request carries a correlation ID you can search for.
 - Once sales are steady, add Supabase's point-in-time recovery so you can restore to any minute, not just last night.
 
 **Security**
 
 - Keep the GitHub repo private. The demo password is in `seed.sql`. It can't log into production, but there's no reason to publish it.
-- Keep production keys only in Vercel and your password manager, never in a file in the repo.
+- Keep production keys only in your host's settings and your password manager, never in a file in the repo.
 - Keep platform admins to one or two people, each with MFA on two devices.
 
 **Not tested yet** (Step 7 is the first real run)
