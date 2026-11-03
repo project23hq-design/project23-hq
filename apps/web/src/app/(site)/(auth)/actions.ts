@@ -37,7 +37,7 @@ export async function signUpAction(_: State, form: FormData): Promise<State> {
     .object({
       fullName: z.string().trim().min(2).max(120),
       email: emailSchema,
-      password: z.string().min(10, "Use at least 10 characters").max(128),
+      password: z.string().min(8, "Use at least 8 characters").max(128),
     })
     .safeParse({
       fullName: form.get("fullName"),
@@ -79,7 +79,7 @@ export async function forgotPasswordAction(_: State, form: FormData): Promise<St
 
 export async function resetPasswordAction(_: State, form: FormData): Promise<State> {
   const password = String(form.get("password") ?? "");
-  if (password.length < 10) return { error: "Use at least 10 characters." };
+  if (password.length < 8) return { error: "Use at least 8 characters." };
   if (password !== String(form.get("confirm") ?? "")) return { error: "Passwords don't match." };
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });

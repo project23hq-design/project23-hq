@@ -170,3 +170,19 @@ export async function promoterOversightAction(_: ActionState, f: FormData): Prom
   });
   return done(error, "Enrollment updated.", "/super-admin/reports");
 }
+
+export async function saveCategoryAction(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requirePlatformAdmin();
+  const { error } = await supabase.rpc("admin_save_category", {
+    p_id: (str(f, "categoryId") || null) as string,
+    p_name: str(f, "name"),
+    p_sort_order: Number(str(f, "sortOrder")) || 100,
+  });
+  return done(error, "Category saved.", "/super-admin/categories");
+}
+
+export async function deleteCategoryAction(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requirePlatformAdmin();
+  const { error } = await supabase.rpc("admin_delete_category", { p_id: str(f, "categoryId") });
+  return done(error, "Category deleted.", "/super-admin/categories");
+}

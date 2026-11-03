@@ -21,6 +21,7 @@ import { deliverEmail } from "@/lib/email";
 import { layout } from "@/lib/email/templates";
 import { env } from "@/lib/env";
 import { paymentProvider } from "@/lib/payments";
+import { resolveCity } from "@/lib/cities";
 import type { ActionState } from "@/components/action-form";
 
 const s = (f: FormData, k: string) => {
@@ -45,13 +46,15 @@ export async function createOrganizationAction(_: ActionState, f: FormData): Pro
   const { supabase, user } = await requireUser("/organizer/new");
   if (!(await rateLimit("org-create", 5, 86400, user.id)))
     return { error: engineErrorMessage("rate_limited") };
+  const city = await resolveCity(supabase, s(f, "city"), s(f, "state"));
+  if (city.error) return { error: city.error };
   const p = organizationSchema.safeParse({
     name: s(f, "name"),
     slug: s(f, "slug"),
     description: s(f, "description"),
     contactEmail: s(f, "contactEmail"),
     contactPhone: s(f, "contactPhone"),
-    cityId: s(f, "cityId"),
+    cityId: city.cityId,
   });
   if (!p.success) return firstIssue(p.error);
   const { error } = await supabase.rpc("create_organization", {
@@ -68,12 +71,14 @@ export async function createOrganizationAction(_: ActionState, f: FormData): Pro
 
 export async function updateOrganizationAction(_: ActionState, f: FormData): Promise<ActionState> {
   const { supabase, org } = await requireOrg(String(f.get("org")), ["owner", "manager"]);
+  const city = await resolveCity(supabase, s(f, "city"), s(f, "state"));
+  if (city.error) return { error: city.error };
   const p = organizationSchema.omit({ slug: true }).safeParse({
     name: s(f, "name"),
     description: s(f, "description"),
     contactEmail: s(f, "contactEmail"),
     contactPhone: s(f, "contactPhone"),
-    cityId: s(f, "cityId"),
+    cityId: city.cityId,
   });
   if (!p.success) return firstIssue(p.error);
   const { error } = await supabase
@@ -141,11 +146,13 @@ export async function updateEventDetailsAction(_: ActionState, f: FormData): Pro
       .filter(Boolean),
   });
   if (!basics.success) return firstIssue(basics.error);
+  const city = await resolveCity(supabase, s(f, "city"), s(f, "state"));
+  if (city.error) return { error: city.error };
   const sched = eventScheduleSchema.safeParse({
     format: s(f, "format"),
     venueName: s(f, "venueName"),
     addressLine: s(f, "addressLine"),
-    cityId: s(f, "cityId"),
+    cityId: city.cityId,
     timezone: s(f, "timezone") ?? "Africa/Lagos",
     startsLocal: s(f, "startsLocal"),
     endsLocal: s(f, "endsLocal"),
@@ -158,7 +165,7 @@ export async function updateEventDetailsAction(_: ActionState, f: FormData): Pro
   });
   if (!sched.success) return firstIssue(sched.error);
   const v = { ...basics.data, ...sched.data };
-  const { data: city } = v.cityId
+  const { data: cityRow } = v.cityId
     ? await supabase.from("cities").select("region_id").eq("id", v.cityId).single()
     : { data: null };
   const description = s(f, "description");
@@ -175,7 +182,7 @@ export async function updateEventDetailsAction(_: ActionState, f: FormData): Pro
       venue_name: v.venueName ?? null,
       address_line: v.addressLine ?? null,
       city_id: v.cityId ?? null,
-      region_id: city?.region_id ?? null,
+      region_id: cityRow?.region_id ?? null,
       timezone: v.timezone,
       starts_at: zonedLocalToUtc(v.startsLocal, v.timezone),
       ends_at: zonedLocalToUtc(v.endsLocal, v.timezone),
@@ -644,7 +651,8 @@ export interface CreateEventInput {
   format: "in_person" | "online";
   venueName?: string;
   addressLine?: string;
-  cityId?: string;
+  city?: string;
+  state?: string;
   capacity: number;
   visibility: "public" | "unlisted";
   tickets: { name: string; price: string; quantity: number; admissionsPerUnit: number }[];
@@ -665,11 +673,13 @@ export async function createEventFullAction(
     tags: [],
   });
   if (!basics.success) return firstIssue(basics.error);
+  const city = await resolveCity(supabase, input.city, input.state);
+  if (city.error) return { error: city.error };
   const sched = eventScheduleSchema.safeParse({
     format: input.format,
     venueName: input.venueName,
     addressLine: input.addressLine,
-    cityId: input.cityId || undefined,
+    cityId: city.cityId,
     timezone: input.timezone,
     startsLocal: input.startsLocal,
     endsLocal: input.endsLocal,
@@ -698,7 +708,7 @@ export async function createEventFullAction(
     tickets.push(p.data);
   }
   const v = { ...basics.data, ...sched.data };
-  const { data: city } = v.cityId
+  const { data: cityRow } = v.cityId
     ? await supabase.from("cities").select("region_id").eq("id", v.cityId).single()
     : { data: null };
   const { data, error } = await supabase
@@ -715,7 +725,7 @@ export async function createEventFullAction(
       venue_name: v.venueName ?? null,
       address_line: v.addressLine ?? null,
       city_id: v.cityId ?? null,
-      region_id: city?.region_id ?? null,
+      region_id: cityRow?.region_id ?? null,
       timezone: v.timezone,
       starts_at: zonedLocalToUtc(v.startsLocal, v.timezone),
       ends_at: zonedLocalToUtc(v.endsLocal, v.timezone),

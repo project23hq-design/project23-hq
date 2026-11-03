@@ -88,7 +88,7 @@ export function AuthForm({
                   name="password"
                   type="password"
                   autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-                  placeholder={mode === "sign-in" ? "Password" : "Password (10+ characters)"}
+                  placeholder={mode === "sign-in" ? "Password" : "Password (8+ characters)"}
                   className={input}
                   required
                 />

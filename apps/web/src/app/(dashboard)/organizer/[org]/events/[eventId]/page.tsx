@@ -34,6 +34,8 @@ import {
 } from "@project23/ui";
 import { requireOrg } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
+import { CityFields } from "@/components/city-fields";
+import { cityOptions } from "@/lib/cities";
 import { EventPoster } from "@/components/poster";
 import { SectionTitle, TabLinks } from "@/components/dashboard-shell";
 import { StatusDot } from "@/components/workspace-event-row";
@@ -173,9 +175,9 @@ export default async function EventEditor({
   );
 
   async function DetailsTab() {
-    const [{ data: cats }, { data: cities }, { data: priv }] = await Promise.all([
+    const [{ data: cats }, cities, { data: priv }] = await Promise.all([
       supabase.from("categories").select("id, name").order("sort_order"),
-      supabase.from("cities").select("id, name").order("sort_order"),
+      cityOptions(supabase),
       supabase
         .from("event_private")
         .select("online_access_instructions")
@@ -251,21 +253,10 @@ export default async function EventEditor({
                 Times are in{" "}
                 {ev.timezone === "Africa/Lagos" ? "West Africa Time (WAT)" : ev.timezone}.
               </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Venue name" htmlFor="venueName">
-                  <Input name="venueName" defaultValue={ev.venue_name ?? ""} />
-                </Field>
-                <Field label="City" htmlFor="cityId">
-                  <Select name="cityId" defaultValue={ev.city_id ?? ""}>
-                    <option value="">—</option>
-                    {cities?.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </Select>
-                </Field>
-              </div>
+              <Field label="Venue name" htmlFor="venueName">
+                <Input name="venueName" defaultValue={ev.venue_name ?? ""} />
+              </Field>
+              <CityFields options={cities} cityId={ev.city_id} />
               <Field label="Address" htmlFor="addressLine">
                 <Input name="addressLine" defaultValue={ev.address_line ?? ""} />
               </Field>

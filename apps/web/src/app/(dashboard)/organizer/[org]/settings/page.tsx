@@ -1,14 +1,16 @@
-import { Card, Field, Input, Select, Textarea } from "@project23/ui";
+import { Card, Field, Input, Textarea } from "@project23/ui";
 import { requireOrg } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
+import { CityFields } from "@/components/city-fields";
+import { cityOptions } from "@/lib/cities";
 import { updateOrganizationAction } from "../actions";
 
 export default async function Settings({ params }: { params: Promise<{ org: string }> }) {
   const { org: slug } = await params;
   const { supabase, org } = await requireOrg(slug, ["owner", "manager"]);
-  const [{ data: o }, { data: cities }] = await Promise.all([
+  const [{ data: o }, cities] = await Promise.all([
     supabase.from("organizations").select("*").eq("id", org.id).single(),
-    supabase.from("cities").select("id, name").order("sort_order"),
+    cityOptions(supabase),
   ]);
   return (
     <div className="max-w-2xl space-y-6">
@@ -33,16 +35,7 @@ export default async function Settings({ params }: { params: Promise<{ org: stri
               <Input name="contactPhone" defaultValue={o?.contact_phone ?? ""} />
             </Field>
           </div>
-          <Field label="City" htmlFor="cityId">
-            <Select name="cityId" defaultValue={o?.city_id ?? ""}>
-              <option value="">—</option>
-              {cities?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <CityFields options={cities} cityId={o?.city_id} />
         </ActionForm>
       </Card>
     </div>

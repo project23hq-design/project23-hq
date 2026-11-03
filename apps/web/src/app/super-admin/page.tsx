@@ -29,10 +29,17 @@ export default async function AdminOverview({
   const { supabase } = await requirePlatformAdmin();
   const to = new Date();
   const from = new Date(to.getTime() - days * 86400_000);
-  const [{ data: o }, { data: rec }] = await Promise.all([
-    supabase.rpc("admin_overview", { p_from: from.toISOString(), p_to: to.toISOString() }),
-    supabase.rpc("run_reconciliation"),
-  ]);
+  const [{ data: o }, { data: rec }, { count: feeCount }, { count: categoryCount }] =
+    await Promise.all([
+      supabase.rpc("admin_overview", { p_from: from.toISOString(), p_to: to.toISOString() }),
+      supabase.rpc("run_reconciliation"),
+      supabase
+        .from("fee_policies")
+        .select("id", { count: "exact", head: true })
+        .eq("scope", "platform")
+        .lte("effective_from", to.toISOString()),
+      supabase.from("categories").select("id", { count: "exact", head: true }),
+    ]);
   const ov = o as { [k: string]: number } & {
     balances: Record<string, number>;
     gross_collected_minor: number;
@@ -66,6 +73,28 @@ export default async function AdminOverview({
           ))}
         </div>
       </div>
+      {(!feeCount || !categoryCount) && (
+        <Alert tone="warning" title="Finish setting up before launch">
+          {!feeCount && (
+            <span className="block">
+              No platform fee is set, so checkout is closed.{" "}
+              <Link className="underline" href="/super-admin/fees">
+                Set the platform fee
+              </Link>
+              .
+            </span>
+          )}
+          {!categoryCount && (
+            <span className="block">
+              There are no categories, so organizers can&apos;t create events.{" "}
+              <Link className="underline" href="/super-admin/categories">
+                Add categories
+              </Link>
+              .
+            </span>
+          )}
+        </Alert>
+      )}
       <p className="text-sm text-fg-muted">
         Period: last {days} days · Currency: NGN · Sales figures are order-based; balances below are
         ledger-based (all-time).

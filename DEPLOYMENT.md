@@ -60,31 +60,33 @@ Order to do things in:
 
 ## Step 1: Supabase (database and logins)
 
-You end this step with an empty production database that has all the tables and security rules, plus the cities, categories and the 5% fee. About 30 minutes. **Never run the full `seed.sql` here:** it creates the demo accounts with the shared password.
+You end this step with an empty production database that has all the tables and security rules, plus Naira, Nigeria and its states. About 30 minutes.
 
 1. Go to supabase.com → New project.
    - Name: `project23-prod`
    - Region: London (eu-west-2). There is no African region, and London is closest to Nigeria.
    - Database password: generate a strong one and save it in a password manager.
 2. Upgrade the project to Pro (Billing). You need it for daily backups, leaked-password protection and normal email limits.
-3. On your Mac, in the project folder, link and push the database structure:
+3. Database changes are applied automatically by GitHub Actions on every push to `main` (`.github/workflows/deploy-database.yml`). In GitHub → the repo → Settings → Secrets and variables → Actions, add:
 
-   ```bash
-   pnpm exec supabase login
-   pnpm exec supabase link --project-ref YOUR_PROJECT_REF
-   pnpm exec supabase db push
-   ```
+   | Secret                      | Where to find it                                                  |
+   | --------------------------- | ----------------------------------------------------------------- |
+   | `SUPABASE_ACCESS_TOKEN`     | supabase.com → Account → Access Tokens → Generate                 |
+   | `SUPABASE_PROJECT_REF`      | The random ID in your Supabase dashboard URL                      |
+   | `SUPABASE_DB_PASSWORD`      | The database password from step 1                                 |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role`                           |
+   | `SUPER_ADMIN_EMAIL`         | The Project23 admin's email (comma-separate several)              |
+   | `NETLIFY_BUILD_HOOK`        | Optional. Netlify → Build hooks; redeploys after the database run |
 
-   The project ref is the random ID in your Supabase dashboard URL. `db push` asks for the database password from step 1. It applies all 11 migrations, including the image storage buckets.
-
-4. Load the reference data. Open `supabase/seed.sql` and copy everything from the top down to (not including) the `Local test users` heading, about the first 50 lines. Paste it into Supabase → SQL Editor and run it. That adds currencies, countries, Osun and other states, the cities, the 9 categories and the 5% platform fee. Without it nobody can create an event.
+   Then GitHub → Actions → Deploy database → Run workflow (or push to `main`). It applies every migration, including Naira, Nigeria and its 36 states + FCT, and the image storage buckets.
+4. Nothing else to load. Cities are created as organizers type them. Categories and the platform fee are set by you in the admin area (Step 6); until a platform fee exists, checkout stays closed. **Never run `seed.sql` here:** it is local demo data with a shared password.
 5. Check Storage shows three buckets: `event-media`, `org-logos`, `org-private`.
 6. Authentication → URL Configuration (fill in once you have the domain):
    - Site URL: `https://YOUR-DOMAIN`
    - Redirect URLs: add `https://YOUR-DOMAIN/**`
 7. Authentication → Sign In / Providers → Email:
    - Confirm email: on
-   - Minimum password length: 10
+   - Minimum password length: 8
    - Leaked password protection: on
 8. Authentication → Multi-Factor: TOTP (authenticator app) enabled. The admin area refuses to open without it.
 9. Authentication → Emails → SMTP Settings: turn on custom SMTP after Step 4 (Resend). Supabase's built-in email only sends a few emails an hour, so sign-ups will stall without it.
@@ -244,30 +246,20 @@ Check it after a few minutes in Supabase → Integrations → Cron: runs should 
 
 ## Step 6: Your admin account and the Project23 organization
 
-You end this step able to open `/super-admin` on the live site. Your local admin login and authenticator don't carry over: production starts with zero accounts. There is deliberately no button that makes someone an admin, so it's done once in SQL.
+You end this step able to open `/super-admin` on the live site. There is deliberately no button or sign-up option that makes someone an admin: the deploy workflow creates the account for `SUPER_ADMIN_EMAIL` and grants the role with the service role key, which only GitHub Actions and the server hold.
 
-1. On the live site, sign up with your real email and a strong, unique password (not the local test password). Click the confirmation link in the email.
-2. Supabase → Authentication → Users: find your email and copy the User UID.
-3. Supabase → SQL Editor, replace `YOUR_USER_UID` in both places and run:
-
-   ```sql
-   insert into public.platform_role_assignments (user_id, role)
-   values ('YOUR_USER_UID', 'super_admin');
-
-   insert into public.audit_logs (actor_kind, action, entity_type, entity_id, reason, metadata)
-   values ('system', 'platform_role.grant', 'user', 'YOUR_USER_UID',
-           'initial production admin', '{"role":"super_admin"}');
-   ```
-
-4. On the site, go to `/account/security` and set up an authenticator app (Google Authenticator, 1Password or similar). Add it on a second device too, so losing your phone doesn't lock you out.
-5. Sign out, sign back in, enter the 6-digit code, and open `/super-admin`.
+1. After the Deploy database workflow has run, go to `/forgot-password` on the live site and enter the admin email. Use the emailed link to set a strong, unique password.
+2. Sign in, go to `/account/security` and set up an authenticator app (Google Authenticator, 1Password or similar). Add it on a second device too, so losing your phone doesn't lock you out. `/super-admin` refuses to open without it.
+3. Sign out, sign back in, enter the 6-digit code, and open `/super-admin`.
+4. Set the platform fee at `/super-admin/fees` and add categories at `/super-admin/categories`. The overview page reminds you until both are done.
+5. To add or change an admin later, edit the `SUPER_ADMIN_EMAIL` secret and re-run the workflow. Removing an email does not revoke access; do that in SQL by setting `revoked_at` on their `platform_role_assignments` row.
 6. Create the Project23 organization at `/organizer/new`. Then mark it as first-party in SQL (use the slug you chose):
 
    ```sql
    update public.organizations set is_first_party = true where slug = 'project23';
    ```
 
-The 5% platform fee from Step 1 applies to every organization. Change it later at `/super-admin/fees`.
+The platform fee you set applies to every organization unless you add an organization or event override at `/super-admin/fees`.
 
 ## Step 7: Go-live test, then switch to live money
 
@@ -302,7 +294,7 @@ Once live, the routine is: push code to deploy, check the jobs page daily, and r
 **Shipping updates**
 
 - Push to `main` on GitHub and your host deploys automatically.
-- If the change adds a file in `supabase/migrations`, run `pnpm exec supabase db push` before the deploy goes out.
+- New files in `supabase/migrations` are applied by the Deploy database workflow when you push to `main`. Check it went green in GitHub → Actions.
 
 **Keeping an eye on it**
 

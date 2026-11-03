@@ -38,11 +38,13 @@ export function CreateEventForm({
   orgName,
   categories,
   cities,
+  states,
 }: {
   org: string;
   orgName: string;
   categories: Opt[];
-  cities: Opt[];
+  cities: { name: string }[];
+  states: { code: string; name: string }[];
 }) {
   const router = useRouter();
   const defaults = useMemo(() => {
@@ -65,7 +67,8 @@ export function CreateEventForm({
   const [format, setFormat] = useState<"in_person" | "online">("in_person");
   const [venueName, setVenueName] = useState("");
   const [address, setAddress] = useState("");
-  const [cityId, setCityId] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [capacity, setCapacity] = useState(200);
   const [explore, setExplore] = useState(true);
@@ -105,7 +108,8 @@ export function CreateEventForm({
         format,
         venueName: venueName || undefined,
         addressLine: address || undefined,
-        cityId: cityId || undefined,
+        city: format === "online" ? undefined : city || undefined,
+        state: state || undefined,
         capacity,
         visibility: explore ? "public" : "unlisted",
         tickets:
@@ -332,16 +336,37 @@ export function CreateEventForm({
                 <label htmlFor="city" className="shrink-0">
                   City
                 </label>
-                <select
+                <input
                   id="city"
-                  value={cityId}
-                  onChange={(e) => setCityId(e.target.value)}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  list="city-suggestions"
+                  autoComplete="address-level2"
+                  maxLength={80}
+                  placeholder="Type your city"
+                  className="ml-auto min-w-0 bg-transparent py-2 text-right text-sm placeholder:text-fg-subtle focus:outline-none"
+                />
+                <datalist id="city-suggestions">
+                  {[...new Set(cities.map((c) => c.name))].map((n) => (
+                    <option key={n} value={n} />
+                  ))}
+                </datalist>
+              </div>
+              <div className={row}>
+                <MapPin className="size-4 shrink-0 opacity-0" />
+                <label htmlFor="state" className="shrink-0">
+                  State
+                </label>
+                <select
+                  id="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
                   className="ml-auto bg-transparent py-2 text-right text-sm focus:outline-none [&>option]:bg-zinc-900"
                 >
                   <option value="">Choose…</option>
-                  {cities.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
+                  {states.map((st) => (
+                    <option key={st.code} value={st.code}>
+                      {st.name}
                     </option>
                   ))}
                 </select>

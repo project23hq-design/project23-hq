@@ -1,14 +1,16 @@
-import { Alert, Card, Field, Input, Select, Textarea } from "@project23/ui";
+import { Alert, Card, Field, Input, Textarea } from "@project23/ui";
 import { requireUser } from "@/lib/auth";
 import { PageHeader, WorkspaceTopBar } from "@/components/dashboard-shell";
 import { ActionForm } from "@/components/action-form";
+import { CityFields } from "@/components/city-fields";
+import { cityOptions } from "@/lib/cities";
 import { createOrganizationAction } from "../[org]/actions";
 
 export const metadata = { title: "Create organization" };
 
 export default async function NewOrg() {
   const { supabase, user } = await requireUser("/organizer/new");
-  const { data: cities } = await supabase.from("cities").select("id, name").order("sort_order");
+  const cities = await cityOptions(supabase);
   return (
     <>
       <WorkspaceTopBar back={{ href: "/organizer", label: "Organizations" }} />
@@ -47,16 +49,7 @@ export default async function NewOrg() {
                 <Input name="contactPhone" type="tel" placeholder="+234" />
               </Field>
             </div>
-            <Field label="City" htmlFor="cityId">
-              <Select name="cityId">
-                <option value="">Select…</option>
-                {cities?.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+            <CityFields options={cities} />
           </ActionForm>
         </Card>
       </main>

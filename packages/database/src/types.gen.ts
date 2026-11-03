@@ -1710,6 +1710,9 @@ isOneToOne: false
 "access_token_resolve":
 { Args: { "p_hash": string }; Returns: Json
                            },
+"admin_delete_category":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "admin_feature_event":
 { Args: { "p_event": string,"p_featured": boolean,"p_rank"?: number }; Returns: undefined
                            },
@@ -1721,6 +1724,9 @@ isOneToOne: false
                            },
 "admin_retry_job":
 { Args: { "p_job": number }; Returns: undefined
+                           },
+"admin_save_category":
+{ Args: { "p_id": string,"p_name": string,"p_sort_order"?: number }; Returns: string
                            },
 "admin_set_fee_policy":
 { Args: { "p_buyer_fee_bps": number,"p_buyer_fixed_minor": number,"p_effective_from": string,"p_event": string,"p_note": string,"p_org": string,"p_platform_fee_bps": number,"p_platform_fixed_minor": number,"p_refundable": boolean,"p_scope": string }; Returns: string
@@ -1951,6 +1957,9 @@ isOneToOne: false
                            },
 "remove_member":
 { Args: { "p_org": string,"p_user": string }; Returns: undefined
+                           },
+"resolve_city":
+{ Args: { "p_name": string,"p_state"?: string }; Returns: string
                            },
 "revoke_invitation":
 { Args: { "p_invitation": string }; Returns: undefined

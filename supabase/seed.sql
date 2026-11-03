@@ -5,22 +5,8 @@
 -- ---------------------------------------------------------------------------
 -- Reference data
 -- ---------------------------------------------------------------------------
-insert into public.currencies (code, name, symbol, minor_unit, checkout_enabled) values
-  ('NGN', 'Nigerian Naira', '₦', 2, true),
-  ('GHS', 'Ghanaian Cedi', 'GH₵', 2, false),
-  ('KES', 'Kenyan Shilling', 'KSh', 2, false);
-
-insert into public.countries (code, name, default_currency, default_timezone, phone_prefix, checkout_enabled) values
-  ('NG', 'Nigeria', 'NGN', 'Africa/Lagos', '+234', true),
-  ('GH', 'Ghana', 'GHS', 'Africa/Accra', '+233', false),
-  ('KE', 'Kenya', 'KES', 'Africa/Nairobi', '+254', false);
-
-insert into public.regions (id, country_code, code, name, is_launch_region) values
-  ('10000000-0000-4000-8000-000000000001', 'NG', 'OS', 'Osun', true),
-  ('10000000-0000-4000-8000-000000000002', 'NG', 'LA', 'Lagos', false),
-  ('10000000-0000-4000-8000-000000000003', 'NG', 'OY', 'Oyo', false),
-  ('10000000-0000-4000-8000-000000000004', 'NG', 'FC', 'Federal Capital Territory', false),
-  ('10000000-0000-4000-8000-000000000005', 'NG', 'EK', 'Ekiti', false);
+-- Naira, Nigeria and the states come from migration 20261103000100. These demo cities,
+-- categories and the 5% fee are LOCAL ONLY: production admins set their own.
 
 insert into public.cities (id, region_id, slug, name, timezone, sort_order) values
   ('11000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'osogbo', 'Osogbo', 'Africa/Lagos', 1),

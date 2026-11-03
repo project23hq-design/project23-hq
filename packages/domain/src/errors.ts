@@ -67,6 +67,11 @@ export const ENGINE_ERRORS: Record<string, string> = {
   effective_date_in_past: "Effective date can't be in the past.",
   invalid_amount: "Enter a valid amount.",
   invalid_value: "That value isn't valid.",
+  invalid_city: "Enter a city name (2–80 characters).",
+  city_state_required: "Choose the state this city is in.",
+  invalid_state: "Choose a valid state.",
+  category_exists: "A category with that name already exists.",
+  category_in_use: "Events use this category, so it can't be deleted. Rename it instead.",
 };
 
 export function engineErrorMessage(

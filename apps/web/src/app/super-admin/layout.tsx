@@ -10,6 +10,7 @@ import {
   ScrollText,
   ServerCog,
   ShieldCheck,
+  Tags,
   Wallet,
 } from "lucide-react";
 import { requirePlatformAdmin } from "@/lib/auth";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/super-admin/orders", label: "Orders", icon: <Receipt /> },
   { href: "/super-admin/finance", label: "Finance", icon: <Wallet /> },
   { href: "/super-admin/fees", label: "Fees", icon: <Percent /> },
+  { href: "/super-admin/categories", label: "Categories", icon: <Tags /> },
   { href: "/super-admin/reports", label: "Reports & flags", icon: <Flag /> },
   { href: "/super-admin/jobs", label: "Jobs", icon: <ServerCog /> },
   { href: "/super-admin/audit", label: "Audit log", icon: <ScrollText /> },
