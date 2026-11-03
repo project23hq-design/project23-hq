@@ -17,7 +17,6 @@ const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   transpilePackages: ["@project23/ui", "@project23/domain", "@project23/database"],
-  serverExternalPackages: ["pdf-lib", "sanitize-html"],
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 480, 640, 828, 1080, 1280, 1600],
