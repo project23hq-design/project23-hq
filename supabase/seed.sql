@@ -5,8 +5,8 @@
 -- ---------------------------------------------------------------------------
 -- Reference data
 -- ---------------------------------------------------------------------------
--- Naira, Nigeria and the states come from migration 20261103000100. These demo cities,
--- categories and the 5% fee are LOCAL ONLY: production admins set their own.
+-- Naira, Nigeria and the states come from migration 20261103000100, categories from
+-- 20261103000200. These demo cities and the 5% fee are LOCAL ONLY: production admins set their own.
 
 insert into public.cities (id, region_id, slug, name, timezone, sort_order) values
   ('11000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'osogbo', 'Osogbo', 'Africa/Lagos', 1),
@@ -18,17 +18,6 @@ insert into public.cities (id, region_id, slug, name, timezone, sort_order) valu
   ('11000000-0000-4000-8000-000000000007', '10000000-0000-4000-8000-000000000003', 'ibadan', 'Ibadan', 'Africa/Lagos', 21),
   ('11000000-0000-4000-8000-000000000008', '10000000-0000-4000-8000-000000000004', 'abuja', 'Abuja', 'Africa/Lagos', 22),
   ('11000000-0000-4000-8000-000000000009', '10000000-0000-4000-8000-000000000005', 'ado-ekiti', 'Ado-Ekiti', 'Africa/Lagos', 23);
-
-insert into public.categories (id, slug, name, icon, sort_order) values
-  ('12000000-0000-4000-8000-000000000001', 'music', 'Music', 'music', 1),
-  ('12000000-0000-4000-8000-000000000002', 'nightlife', 'Nightlife', 'moon', 2),
-  ('12000000-0000-4000-8000-000000000003', 'comedy', 'Comedy', 'laugh', 3),
-  ('12000000-0000-4000-8000-000000000004', 'conferences', 'Conferences', 'presentation', 4),
-  ('12000000-0000-4000-8000-000000000005', 'campus', 'Campus', 'graduation-cap', 5),
-  ('12000000-0000-4000-8000-000000000006', 'workshops', 'Workshops', 'wrench', 6),
-  ('12000000-0000-4000-8000-000000000007', 'community', 'Community', 'users', 7),
-  ('12000000-0000-4000-8000-000000000008', 'arts-culture', 'Arts & Culture', 'palette', 8),
-  ('12000000-0000-4000-8000-000000000009', 'food-drink', 'Food & Drink', 'utensils', 9);
 
 -- Default platform commission: 5% of organizer ticket proceeds, no buyer fee.
 insert into public.fee_policies (scope, platform_fee_bps, platform_fixed_minor, buyer_fee_bps, buyer_fixed_minor, note, effective_from)
@@ -133,20 +122,20 @@ create or replace function pg_temp.ev(
     p_featured, case when p_featured then 1 end, p_refund,
     'Valid ticket required for entry. Each QR admits one person once.',
     'Step-free entrance at the main gate. Contact the organizer for specific needs.',
-    case when p_cat = 'nightlife' then 18 end,
+    case when p_cat = 'parties-nightlife' then 18 end,
     (select user_id from public.memberships where organization_id = p_org and role = 'owner' limit 1)
   from public.cities c where c.slug = p_city;
 $$;
 
 select pg_temp.ev('30000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000002', 'osogbo-afrobeats-night',
   'Osogbo Afrobeats Night', 'An all-night Afrobeats and Amapiano session with rotating DJs and a live percussion set.',
-  'nightlife', 'osogbo', 'Grove Lounge (fictional)', '12 Station Road, Osogbo', 12, 7, 300, 'published', true, '{afrobeats,amapiano,dj}');
+  'parties-nightlife', 'osogbo', 'Grove Lounge (fictional)', '12 Station Road, Osogbo', 12, 7, 300, 'published', true, '{afrobeats,amapiano,dj}');
 select pg_temp.ev('30000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001', 'project23-rooftop-sessions-osogbo',
   'Project23 Rooftop Sessions: Osogbo', 'Sunset live music, local food vendors and a skyline view. Produced by Project23.',
   'music', 'osogbo', 'Skyline Terrace (fictional)', 'Gbongan Road, Osogbo', 19, 5, 200, 'published', true, '{live,sunset,rooftop}');
 select pg_temp.ev('30000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-000000000003', 'ife-tech-founders-meetup',
   'Ife Tech & Founders Meetup', 'Lightning talks from student founders, a product teardown, and open networking.',
-  'conferences', 'ile-ife', 'Innovation Hall (fictional)', 'Campus Road, Ile-Ife', 9, 4, 200, 'published', false, '{tech,startups,networking}', 'no_refunds');
+  'conferences-summits', 'ile-ife', 'Innovation Hall (fictional)', 'Campus Road, Ile-Ife', 9, 4, 200, 'published', false, '{tech,startups,networking}', 'no_refunds');
 select pg_temp.ev('30000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000004', 'ilesa-comedy-jamz',
   'Ilesa Comedy Jamz', 'Five rising comedians, one microphone, and a crowd that talks back.',
   'comedy', 'ilesa', 'Owa Hall (fictional)', 'Palace Road, Ilesa', 6, 3, 250, 'published', true, '{standup,comedy}');
@@ -158,16 +147,16 @@ select pg_temp.ev('30000000-0000-4000-8000-000000000006', '20000000-0000-4000-80
   'arts-culture', 'ile-ife', 'Amphitheatre B (fictional)', 'Campus Road, Ile-Ife', 4, 3, 20, 'published', false, '{poetry,spoken-word}');
 select pg_temp.ev('30000000-0000-4000-8000-000000000007', '20000000-0000-4000-8000-000000000001', 'osun-creatives-product-design-workshop',
   'Osun Creatives Workshop: Product Design', 'A hands-on day of UX research, wireframing and critique with working designers.',
-  'workshops', 'osogbo', 'Project23 Studio (fictional)', 'Old Garage, Osogbo', 15, 7, 60, 'published', false, '{design,ux,career}');
+  'workshops-classes', 'osogbo', 'Project23 Studio (fictional)', 'Old Garage, Osogbo', 15, 7, 60, 'published', false, '{design,ux,career}');
 select pg_temp.ev('30000000-0000-4000-8000-000000000008', '20000000-0000-4000-8000-000000000002', 'lagos-sunset-social',
   'Lagos Sunset Social', 'Beachside DJs, games and food trucks as the sun goes down.',
-  'nightlife', 'lagos', 'Shoreline Deck (fictional)', 'Admiralty Way, Lekki, Lagos', 22, 6, 500, 'published', false, '{beach,social}');
+  'parties-nightlife', 'lagos', 'Shoreline Deck (fictional)', 'Admiralty Way, Lekki, Lagos', 22, 6, 500, 'published', false, '{beach,social}');
 select pg_temp.ev('30000000-0000-4000-8000-000000000009', '20000000-0000-4000-8000-000000000001', 'abuja-founders-dinner',
   'Abuja Founders Dinner', 'An intimate dinner conversation for early-stage founders and operators.',
-  'conferences', 'abuja', 'Garden Court (fictional)', 'Maitama, Abuja', 26, 3, 40, 'published', false, '{founders,dinner}');
+  'conferences-summits', 'abuja', 'Garden Court (fictional)', 'Maitama, Abuja', 26, 3, 40, 'published', false, '{founders,dinner}');
 select pg_temp.ev('30000000-0000-4000-8000-00000000000a', '20000000-0000-4000-8000-000000000003', 'iwo-community-praise-night',
   'Iwo Community Praise Night', 'A free open-air community choir evening. Everyone welcome.',
-  'community', 'iwo', 'Town Square (fictional)', 'Oja Oba, Iwo', 10, 3, 300, 'published', false, '{choir,free}');
+  'charity-causes', 'iwo', 'Town Square (fictional)', 'Oja Oba, Iwo', 10, 3, 300, 'published', false, '{choir,free}');
 select pg_temp.ev('30000000-0000-4000-8000-00000000000b', '20000000-0000-4000-8000-000000000002', 'osogbo-street-food-festival',
   'Osogbo Street Food Festival', 'Fifty food stalls and a cook-off. (Seeded as cancelled.)',
   'food-drink', 'osogbo', 'Freedom Park (fictional)', 'Ola-Iya, Osogbo', 8, 6, 500, 'published', false, '{food}');

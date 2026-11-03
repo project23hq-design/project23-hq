@@ -105,13 +105,13 @@ function Flyer(p: PosterProps) {
   const kind =
     cat === "comedy"
       ? "comedy"
-      : cat === "conferences" || cat === "workshops" || cat === "campus"
+      : ["conferences-summits", "workshops-classes", "business-networking", "tech"].includes(cat)
         ? "swiss"
-        : cat === "arts-culture"
+        : ["arts-culture", "theatre-performance", "film-screenings"].includes(cat)
           ? "arts"
           : cat === "food-drink"
             ? "food"
-            : cat === "community"
+            : ["charity-causes", "faith-religion", "kids-family"].includes(cat)
               ? "community"
               : cat === "music" && live
                 ? "live"
