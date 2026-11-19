@@ -6,7 +6,7 @@ const cell = (v: unknown) => {
   return `"${(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`;
 };
 
-/** Admin-only export; authorization enforced by RLS (is_platform_admin requires aal2). */
+/** Admin-only export; authorization enforced by RLS (is_platform_admin). */
 export async function GET() {
   const supabase = await createClient();
   const { data: roles } = await supabase.rpc("my_platform_roles");

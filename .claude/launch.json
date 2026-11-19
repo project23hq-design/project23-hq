@@ -1,6 +1,15 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "web", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@project23/web", "dev"], "port": 3000 }
+    { "name": "web", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@project23/web", "dev"], "port": 3000 },
+    {
+      "name": "web-local-db",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "eval \"$(pnpm exec supabase status -o env 2>/dev/null | grep -E '^(API_URL|ANON_KEY|SERVICE_ROLE_KEY)=')\" && NEXT_PUBLIC_SUPABASE_URL=\"$API_URL\" NEXT_PUBLIC_SUPABASE_ANON_KEY=\"$ANON_KEY\" SUPABASE_SERVICE_ROLE_KEY=\"$SERVICE_ROLE_KEY\" NEXT_PUBLIC_APP_URL=http://localhost:3001 pnpm --filter @project23/web exec next start --port 3001"
+      ],
+      "port": 3001
+    }
   ]
 }

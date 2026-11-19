@@ -12,7 +12,7 @@ Scope as implemented. "Later" items are explicitly out of the launch build.
 
 **Promoters** apply to organizer-approved (or open) referral programs, receive an event-scoped link and QR, see visits/orders/earnings, and withdraw available earnings to a verified bank account.
 
-**Platform admins** (provisioned, MFA) review events, approve/verify/suspend organizations, set fee policies, manage featured placement, handle refunds/payout queues/settlements/disputes, inspect order timelines and ledgers, retry dead jobs, read audit logs and edit platform settings.
+**Platform admins** (provisioned; MFA optional) review events, approve/verify/suspend organizations, set fee policies, manage featured placement, handle refunds/payout queues/settlements/disputes, inspect order timelines and ledgers, retry dead jobs, read audit logs and edit platform settings.
 
 **Project23 itself** is the organization `project23` with `is_first_party = true` (a platform-controlled column with a unique index — one first-party org). Its events use the same engine, fees and ledger; the badge is never inferred from a display name.
 
@@ -38,7 +38,7 @@ NGN only at checkout (currency table has GHS/KES disabled), naira formatting via
 
 Final-owner protection: the last owner can't be demoted or removed. Invitations expire after 7 days, are single use, are stored hashed, and can only be accepted by a signed-in user whose **verified** email matches. Promoter enrollment is not membership and grants no dashboard access; members can't promote their own organization's events.
 
-Platform roles (`super_admin`, `finance_admin`, `support`) live in `platform_role_assignments`, insertable only by the service role/DB operators. `is_platform_admin()` requires an active assignment **and** an `aal2` JWT.
+Platform roles (`super_admin`, `finance_admin`, `support`) live in `platform_role_assignments`, insertable only by the service role/DB operators. `is_platform_admin()` requires an active assignment; staff who have enrolled an authenticator app must also have an `aal2` JWT ("MFA if enrolled").
 
 ## 4. Organizer lifecycle
 

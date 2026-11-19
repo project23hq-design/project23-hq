@@ -5,7 +5,7 @@ import { buyTickets, capturedEmails, q, qrToken, runWorker, signIn } from "./sup
 
 /**
  * Core acceptance journey (spec §15): a third-party organizer creates an event with Early
- * Bird and Regular tickets and publishes it (no review queue); a platform admin with MFA can
+ * Bird and Regular tickets and publishes it (no review queue); a platform admin can
  * pause and resume it; a guest discovers it and buys
  * two admissions; receives two unique tickets by email and retrieves them securely; assigned
  * staff check each ticket in once; the organizer sees correct sales and net proceeds.
@@ -86,7 +86,7 @@ test("organizer creates an event with Early Bird and Regular tickets and publish
   expect((await page.request.get(`/events/${slug}`)).status()).toBe(200);
 });
 
-test("a platform admin with MFA can take the event down and restore it", async ({ page }) => {
+test("a platform admin can take the event down and restore it", async ({ page }) => {
   const [{ id }] = await q<{ id: string }>(
     `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
        confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
@@ -102,14 +102,16 @@ test("a platform admin with MFA can take the event down and restore it", async (
 
   await signIn(page, adminEmail, adminPassword, "/super-admin");
   await page.goto("/super-admin");
-  await expect(page).toHaveURL(/account\/security\?mfa=required/); // role alone is not enough
+  await expect(page).toHaveURL(/\/super-admin/); // MFA is optional for staff without an authenticator
+  // Turning MFA on is still possible, and from then on the admin area needs the code.
+  await page.goto("/account/security");
   await page.getByRole("button", { name: "Set up authenticator app" }).click();
   const secret = (await page.getByText(/Manual key:/).textContent())!
     .replace("Manual key:", "")
     .replace(/\s+/g, "");
   await page.getByLabel("6-digit code").fill(generateSync({ secret }));
   await page.getByRole("button", { name: "Verify" }).click();
-  await page.waitForURL((u) => u.pathname.startsWith("/super-admin"));
+  await expect(page.getByText("Two-factor authentication is on")).toBeVisible();
   await page.goto(`/super-admin/events?q=${encodeURIComponent(title)}`);
   const row = page.getByRole("row", { name: new RegExp(title) });
   page.once("dialog", (d) => d.accept());

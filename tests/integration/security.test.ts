@@ -257,7 +257,7 @@ describe("row level security and privilege boundaries", () => {
     );
   });
 
-  it("prevents self-promotion to platform admin and requires MFA for admin power", async () => {
+  it("prevents self-promotion to platform admin; MFA is optional but enforced once enrolled", async () => {
     await expectError(
       as(
         user(USERS.organizer),
@@ -274,18 +274,33 @@ describe("row level security and privilege boundaries", () => {
       "insert into platform_role_assignments (user_id, role) values ($1, 'super_admin') on conflict (user_id, role) do update set revoked_at = null",
       [USERS.ops],
     );
-    await expectError(
-      as(
-        user(USERS.ops, { aal: "aal1" }),
-        "select public.admin_overview(now() - interval '1 day', now())",
-      ),
-      "forbidden",
-    );
-    const ok = await as(
-      user(USERS.ops, { aal: "aal2" }),
+    // No authenticator app enrolled: a password (aal1) session is enough.
+    const withoutMfa = await as(
+      user(USERS.ops, { aal: "aal1" }),
       "select public.admin_overview(now() - interval '1 day', now()) o",
     );
-    expect(ok).toHaveLength(1);
+    expect(withoutMfa).toHaveLength(1);
+    // Once an authenticator app is enrolled, the session must have verified it (aal2).
+    const [{ id: factorId }] = await admin<{ id: string }>(
+      "insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at) values (gen_random_uuid(), $1, 'test', 'totp', 'verified', now(), now()) returning id",
+      [USERS.ops],
+    );
+    try {
+      await expectError(
+        as(
+          user(USERS.ops, { aal: "aal1" }),
+          "select public.admin_overview(now() - interval '1 day', now())",
+        ),
+        "forbidden",
+      );
+      const ok = await as(
+        user(USERS.ops, { aal: "aal2" }),
+        "select public.admin_overview(now() - interval '1 day', now()) o",
+      );
+      expect(ok).toHaveLength(1);
+    } finally {
+      await admin("delete from auth.mfa_factors where id = $1", [factorId]);
+    }
     await admin("update platform_role_assignments set revoked_at = now() where user_id = $1", [
       USERS.ops,
     ]);

@@ -4,8 +4,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { promoterOversightAction, reportAction } from "../actions";
 
+export const metadata = { title: "Reports & flags" };
+
 export default async function Reports() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("reports");
   const [{ data: reports }, { data: flags }] = await Promise.all([
     supabase
       .from("reports")

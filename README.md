@@ -10,7 +10,7 @@ One Next.js app with four separately secured experiences on one shared engine:
 | Organizer dashboard | `/organizer/[org]/*` | Organization members (owner / manager / finance / event staff) |
 | Gate | `/gate`, `/gate/[eventId]` | Staff assigned to an event |
 | Promoter earnings | `/promoter` | Any verified user enrolled in a referral program |
-| Platform administration | `/super-admin/*` | Provisioned platform staff with an MFA-verified session |
+| Platform administration | `/super-admin/*` | Provisioned platform staff (MFA optional, enforced once enrolled) |
 
 > **Status:** working local build with test-mode integrations. **Not production-ready**: see "Readiness" below and [`docs/progress.md`](docs/progress.md).
 
@@ -89,7 +89,7 @@ No seed account is a platform admin. To create one locally:
 pnpm admin:create --email admin@project23.test
 ```
 
-The script prints a one-time password and refuses non-local Supabase URLs unless `--allow-remote` is passed. Sign in, enrol an authenticator app at `/account/security`, then open `/super-admin`. The database requires an MFA (aal2) session for every privileged call.
+The script prints a one-time password and refuses non-local Supabase URLs unless `--allow-remote` is passed. Sign in and open `/super-admin`. Two-factor authentication is optional; once an authenticator app is enrolled at `/account/security`, the database requires a verified (aal2) session for every privileged call.
 
 Useful seeded data: promo code `OSUN10` (10% off Osogbo Afrobeats Night), access code `STUDENT23` (student workshop ticket), a VIP table admitting 6, a sold-out event, a not-yet-on-sale event, a cancelled event with refunded orders, a draft and a pending-review event.
 

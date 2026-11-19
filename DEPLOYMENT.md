@@ -21,7 +21,7 @@ Order to do things in:
 3. Set up the Supabase database and load the reference data (Step 1).
 4. Set up Resend email on the domain (Step 4).
 5. Deploy to Vercel or Netlify and start the scheduler (Step 5).
-6. Create your admin account and turn on MFA (Step 6).
+6. Create your admin account and (recommended) turn on MFA (Step 6).
 7. Test everything with Paystack test keys, then switch to live keys (Step 7).
 
 ## Checklist: what you need
@@ -88,7 +88,7 @@ You end this step with an empty production database that has all the tables and 
    - Confirm email: on
    - Minimum password length: 8
    - Leaked password protection: on
-8. Authentication → Multi-Factor: TOTP (authenticator app) enabled. The admin area refuses to open without it.
+8. Authentication → Multi-Factor: TOTP (authenticator app) enabled. It is optional for admins, but once an admin turns it on the admin area asks for the code.
 9. Authentication → Emails → SMTP Settings: turn on custom SMTP after Step 4 (Resend). Supabase's built-in email only sends a few emails an hour, so sign-ups will stall without it.
 10. Database → Extensions: turn on `pg_cron` and `pg_net`. Step 5 uses them for the job scheduler.
 11. Project Settings → API: copy the Project URL, the `anon` public key and the `service_role` key into your password manager. The service role key bypasses all security rules, so it only ever goes into your host's settings (Vercel or Netlify).
@@ -249,7 +249,7 @@ Check it after a few minutes in Supabase → Integrations → Cron: runs should 
 You end this step able to open `/super-admin` on the live site. There is deliberately no button or sign-up option that makes someone an admin: the deploy workflow creates the account for `SUPER_ADMIN_EMAIL` and grants the role with the service role key, which only GitHub Actions and the server hold.
 
 1. After the Deploy database workflow has run, go to `/forgot-password` on the live site and enter the admin email. Use the emailed link to set a strong, unique password.
-2. Sign in, go to `/account/security` and set up an authenticator app (Google Authenticator, 1Password or similar). Add it on a second device too, so losing your phone doesn't lock you out. `/super-admin` refuses to open without it.
+2. Sign in and open `/super-admin`. Strongly recommended: go to `/account/security` and set up an authenticator app (Google Authenticator, 1Password or similar), and add it on a second device too, so losing your phone doesn't lock you out. Once it's on, `/super-admin` asks for the 6-digit code at every sign-in.
 3. Sign out, sign back in, enter the 6-digit code, and open `/super-admin`.
 4. Set the platform fee at `/super-admin/fees` and add categories at `/super-admin/categories`. The overview page reminds you until both are done.
 5. To add or change an admin later, edit the `SUPER_ADMIN_EMAIL` secret and re-run the workflow. Removing an email does not revoke access; do that in SQL by setting `revoked_at` on their `platform_role_assignments` row.
@@ -308,7 +308,7 @@ Once live, the routine is: push code to deploy, check the jobs page daily, and r
 
 - Keep the GitHub repo private. The demo password is in `seed.sql`. It can't log into production, but there's no reason to publish it.
 - Keep production keys only in your host's settings and your password manager, never in a file in the repo.
-- Keep platform admins to one or two people, each with MFA on two devices.
+- Keep platform admins to one or two people, each with MFA turned on (on two devices).
 
 **Not tested yet** (Step 7 is the first real run)
 

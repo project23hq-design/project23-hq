@@ -1710,6 +1710,9 @@ isOneToOne: false
 "access_token_resolve":
 { Args: { "p_hash": string }; Returns: Json
                            },
+"admin_analytics":
+{ Args: { "p_from": string,"p_to": string }; Returns: Json
+                           },
 "admin_delete_category":
 { Args: { "p_id": string }; Returns: undefined
                            },
@@ -1728,14 +1731,32 @@ isOneToOne: false
 "admin_save_category":
 { Args: { "p_id": string,"p_name": string,"p_sort_order"?: number }; Returns: string
                            },
+"admin_search":
+{ Args: { "p_q": string }; Returns: Json
+                           },
 "admin_set_fee_policy":
 { Args: { "p_buyer_fee_bps": number,"p_buyer_fixed_minor": number,"p_effective_from": string,"p_event": string,"p_note": string,"p_org": string,"p_platform_fee_bps": number,"p_platform_fixed_minor": number,"p_refundable": boolean,"p_scope": string }; Returns: string
                            },
 "admin_set_setting":
 { Args: { "p_key": string,"p_reason": string,"p_value": Json }; Returns: undefined
                            },
+"admin_set_staff_role":
+{ Args: { "p_email": string,"p_grant": boolean,"p_reason": string,"p_role": Database["public"]['Enums']["platform_role"] }; Returns: undefined
+                           },
+"admin_staff":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "admin_update_organization":
 { Args: { "p_changes": Json,"p_org": string,"p_reason": string }; Returns: undefined
+                           },
+"admin_user_action":
+{ Args: { "p_action": string,"p_reason": string,"p_user": string }; Returns: Json
+                           },
+"admin_user_detail":
+{ Args: { "p_user": string }; Returns: Json
+                           },
+"admin_users":
+{ Args: { "p_filter"?: string,"p_limit"?: number,"p_offset"?: number,"p_q"?: string }; Returns: Json
                            },
 "assign_event_staff":
 { Args: { "p_comps": boolean,"p_door": boolean,"p_event": string,"p_reentry": boolean,"p_user": string }; Returns: undefined

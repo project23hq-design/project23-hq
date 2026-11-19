@@ -23,10 +23,11 @@ const LABELS: Record<string, string> = {
 export default async function AdminOverview({
   searchParams,
 }: {
-  searchParams: Promise<{ days?: string }>;
+  searchParams: Promise<{ days?: string; denied?: string }>;
 }) {
-  const days = Math.min(365, Math.max(1, Number((await searchParams).days ?? 30)));
-  const { supabase } = await requirePlatformAdmin();
+  const sp = await searchParams;
+  const days = Math.min(365, Math.max(1, Number(sp.days ?? 30)));
+  const { supabase } = await requirePlatformAdmin("overview");
   const to = new Date();
   const from = new Date(to.getTime() - days * 86400_000);
   const [{ data: o }, { data: rec }, { count: feeCount }, { count: categoryCount }] =
@@ -73,6 +74,12 @@ export default async function AdminOverview({
           ))}
         </div>
       </div>
+      {sp.denied && (
+        <Alert tone="warning">
+          Your staff role doesn&apos;t include that page or action. Ask a super admin if you need
+          it.
+        </Alert>
+      )}
       {(!feeCount || !categoryCount) && (
         <Alert tone="warning" title="Finish setting up before launch">
           {!feeCount && (

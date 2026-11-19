@@ -70,7 +70,8 @@ export function MfaPanel({
     <div className="space-y-4">
       {recommended && !verified && (
         <p className="text-sm text-fg-muted">
-          Your account has platform access. Two-factor authentication is mandatory for it.
+          Your account has platform access. Two-factor authentication is optional but strongly
+          recommended: once it&apos;s on, a stolen password alone can&apos;t open the admin area.
         </p>
       )}
       {!factorId && (

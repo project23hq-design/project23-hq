@@ -4,8 +4,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { retryJobAction } from "../actions";
 
+export const metadata = { title: "Jobs" };
+
 export default async function Jobs() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("jobs");
   const [{ data: jobs }, { data: emails }] = await Promise.all([
     supabase
       .from("outbox_jobs")

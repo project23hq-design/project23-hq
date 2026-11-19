@@ -12,13 +12,15 @@ import {
 } from "@project23/ui";
 import { requirePlatformAdmin } from "@/lib/auth";
 
+export const metadata = { title: "Orders" };
+
 export default async function AdminOrders({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("orders");
   const clean = (q ?? "").replace(/[^A-Za-z0-9@._\-]/g, "");
   const { data: orders } =
     clean.length >= 3

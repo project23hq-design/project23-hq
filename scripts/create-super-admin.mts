@@ -3,8 +3,8 @@
  *   pnpm admin:create --email admin@project23.test [--role super_admin|support|finance_admin]
  *
  * - Refuses non-local Supabase URLs unless --allow-remote is passed explicitly.
- * - Prints a one-time random password; the admin must enrol TOTP MFA at /account/security
- *   before /super-admin becomes accessible (the database requires an aal2 session).
+ * - Prints a one-time random password. MFA is optional; once the admin enrols TOTP at
+ *   /account/security, the database requires an aal2 session for admin calls.
  * - There is no API, signup field or profile flag that grants platform roles.
  */
 import { randomBytes } from "node:crypto";
@@ -81,5 +81,5 @@ await db.from("audit_logs").insert({
 console.info(`\n✔ ${role} granted to ${email}`);
 if (!error)
   console.info(
-    `  One-time password: ${password}\n  Sign in, then enrol an authenticator app at /account/security before opening /super-admin.`,
+    `  One-time password: ${password}\n  Sign in and open /super-admin. Recommended: turn on an authenticator app at /account/security.`,
   );

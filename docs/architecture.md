@@ -47,7 +47,7 @@ Browser ──► Next.js (App Router, Server Components, Server Actions, Route 
 ## Security boundaries
 
 1. **Public projection**: clients cannot select base `events`, `organizations` or `ticket_types`. They read `public_events`, `public_ticket_types`, `public_organizations`, `public_event_media`, `trending_events`, `public_referral_programs` — views with explicit safe columns, filtered to approved, active, non-private records.
-2. **RLS on every table** (asserted by pgTAP). Customers see their own orders/tickets; org roles see their tenant per the matrix; scanners see nothing directly, only gate RPCs for assigned events; promoters see their own data and a privacy-safe dashboard RPC; admins only with aal2.
+2. **RLS on every table** (asserted by pgTAP). Customers see their own orders/tickets; org roles see their tenant per the matrix; scanners see nothing directly, only gate RPCs for assigned events; promoters see their own data and a privacy-safe dashboard RPC; admins need an active platform role, plus an aal2 session if they have enrolled an authenticator app.
 3. **Least-privilege grants**: all table and function privileges revoked, then re-granted deliberately (e.g. `tickets` without `qr_hash`, `payout_recipients` without account numbers). Checkout, payment, job, maturity and test-provider RPCs are service-role only.
 4. **SECURITY DEFINER functions** pin `search_path = ''` (asserted by pgTAP) and check `auth.uid()`, membership, aal and recent authentication (`amr` within 15 minutes) themselves.
 5. **Service role** is used only server-side for guest checkout (after validation and rate limits), webhooks and verification, jobs, and guest order viewing after access was established by ownership, a browser-created-order cookie or an emailed token.
@@ -60,5 +60,5 @@ Browser ──► Next.js (App Router, Server Components, Server Actions, Route 
 - **Payments**: Paystack hosted checkout (initialize → redirect → callback), verified with `GET /transaction/verify/:reference`; webhooks verified by HMAC-SHA512 of the raw body (`x-paystack-signature`). Behind a `PaymentProvider` interface; a test provider mirrors the contract locally.
 - **Settlement**: Project23 collects online funds into its own Paystack balance and settles organizers and promoters from the ledger. Split settlement is not used. See `payments-and-settlement.md`.
 - **Email**: Resend with idempotency keys behind an adapter; local capture writes to `.mail-capture/`, rendered at `/dev/mail`.
-- **Auth**: Supabase email/password with confirmation, PKCE links at `/auth/confirm`, TOTP MFA for platform staff, password re-entry for sensitive actions.
+- **Auth**: Supabase email/password with confirmation, PKCE links at `/auth/confirm`, optional TOTP MFA (enforced for staff who enrol it), password re-entry for sensitive actions.
 - **Images**: `next/image` (AVIF/WebP) for uploaded posters; CSS-generated posters otherwise (zero image bytes).

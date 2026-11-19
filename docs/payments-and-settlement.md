@@ -90,7 +90,7 @@ Paystack `charge.dispute.*` webhooks create or update `disputes`. Open disputes 
 
 - Recipients: NUBAN bank code, account name and last 4 digits are visible to authorized users; the full number lives in `private.payout_recipient_secrets` (service role only). Changing a recipient requires owner role and re-authentication, disables the previous recipient, notifies all owners and is audited. Recipients are verified via Paystack Resolve Account plus Create Transfer Recipient (job `payout_recipient.verify`), or by a finance admin.
 - Requests: per-beneficiary advisory lock, available-balance check, minimums, idempotency key, immediate lock entry.
-- Approval: finance admins (aal2). Paystack-transfer recipients are sent automatically by the `payout.transfer` job. It **verifies the transfer by reference before every (re)try**, so an ambiguous earlier attempt that actually succeeded is never paid twice. Manual-bank payouts require an external bank reference to be marked paid.
+- Approval: finance admins. Paystack-transfer recipients are sent automatically by the `payout.transfer` job. It **verifies the transfer by reference before every (re)try**, so an ambiguous earlier attempt that actually succeeded is never paid twice. Manual-bank payouts require an external bank reference to be marked paid.
 - Webhooks `transfer.success|failed|reversed` drive the same transitions.
 
 ## Settlement model choice

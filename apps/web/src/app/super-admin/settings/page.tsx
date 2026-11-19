@@ -3,8 +3,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { settingAction } from "../actions";
 
+export const metadata = { title: "Settings" };
+
 export default async function Settings() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("settings");
   const { data } = await supabase.from("platform_settings").select("*").order("key");
   return (
     <div className="space-y-6">

@@ -16,8 +16,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { feePolicyAction } from "../actions";
 
+export const metadata = { title: "Fees" };
+
 export default async function Fees() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("fees");
   const { data: policies } = await supabase
     .from("fee_policies")
     .select("*")

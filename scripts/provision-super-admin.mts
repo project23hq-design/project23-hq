@@ -6,8 +6,8 @@
  *
  * - The emails live only in a GitHub Actions secret; the service role key never leaves CI.
  * - A missing account is created with a random password that is never shown or stored.
- *   The owner sets their own password with "Forgot password?" on /sign-in, then must enrol
- *   an authenticator app at /account/security before /super-admin opens (aal2 required).
+ *   The owner sets their own password with "Forgot password?" on /sign-in, then can open
+ *   /super-admin. MFA is optional but recommended; once enrolled it is required (aal2).
  * - Idempotent: existing accounts and passwords are left alone; the role is only granted
  *   (and audited) when it isn't already active. Nothing is ever revoked here.
  */
@@ -76,14 +76,12 @@ for (const email of emails) {
     continue;
   }
 
-  const { error: grantErr } = await db
-    .from("platform_role_assignments")
-    .upsert({
-      user_id: userId,
-      role: "super_admin",
-      revoked_at: null,
-      granted_at: new Date().toISOString(),
-    });
+  const { error: grantErr } = await db.from("platform_role_assignments").upsert({
+    user_id: userId,
+    role: "super_admin",
+    revoked_at: null,
+    granted_at: new Date().toISOString(),
+  });
   if (grantErr) throw grantErr;
   await db.from("audit_logs").insert({
     actor_kind: "system",

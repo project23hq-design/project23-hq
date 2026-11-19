@@ -15,8 +15,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { payoutDecisionAction, refundDecisionAction, settlementAction } from "../actions";
 
+export const metadata = { title: "Finance" };
+
 export default async function AdminFinance() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("finance");
   const [{ data: payouts }, { data: refunds }, { data: disputes }] = await Promise.all([
     supabase
       .from("payout_requests")

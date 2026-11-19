@@ -13,8 +13,10 @@ import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
 import { deleteCategoryAction, saveCategoryAction } from "../actions";
 
+export const metadata = { title: "Categories" };
+
 export default async function Categories() {
-  const { supabase } = await requirePlatformAdmin();
+  const { supabase } = await requirePlatformAdmin("categories");
   const [{ data: categories }, { data: used }] = await Promise.all([
     supabase.from("categories").select("id, name, slug, sort_order").order("sort_order"),
     supabase.from("events").select("category_id").not("category_id", "is", null),

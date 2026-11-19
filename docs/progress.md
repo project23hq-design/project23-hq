@@ -28,7 +28,7 @@ Location: `/Users/ayenikoemmanuel/Downloads/project23` (macOS user Downloads fol
 
 What the test suites cover against the acceptance criteria (spec §15/§16):
 
-1. Organizer signup and onboarding, event creation with tiers, MFA-gated approval, public discovery: E2E `core-journey`.
+1. Organizer signup and onboarding, event creation with tiers, admin take-down, public discovery: E2E `core-journey`.
 2. Guest purchase through verified test payment, two unique tickets, single email capture with PDF, secure email-link retrieval, strangers denied: E2E.
 3. Free orders, 100%-discount orders, one ticket per table seat: integration.
 4. Concurrent final-admission checkout, aggregate capacity across types including table seats: integration (25 parallel buyers for 5 seats sell exactly 5).
@@ -36,7 +36,7 @@ What the test suites cover against the acceptance criteria (spec §15/§16):
 6. Concurrent and replayed confirmations, webhook replays, callback/webhook races: one fulfillment, one sale ledger transaction, one delivery job (integration + E2E).
 7. Forged and mismatched amount/currency/environment, unknown references, invalid and missing signatures, malformed bodies, forged redirects: integration + E2E.
 8. Promo caps under concurrency (12 racing for 3), expiry release, fixed-discount cap, immutable price and fee snapshots: integration.
-9. Cross-tenant reads/writes, organization-id spoofing, engine-field tampering, self-promotion to admin, MFA requirement, service-only RPCs, finance/scanner scoping, verified-email order linking, invitation identity, last-owner protection: integration + pgTAP + E2E.
+9. Cross-tenant reads/writes, organization-id spoofing, engine-field tampering, self-promotion to admin, MFA enforced once enrolled, service-only RPCs, finance/scanner scoping, verified-email order linking, invitation identity, last-owner protection: integration + pgTAP + E2E.
 10. Racing gate scans (3 scanners → exactly 1 admitted), wrong event, unknown, refunded, rotated tickets, gated and audited re-entry, door cash not booked as provider revenue, comp permission and capacity: integration + E2E.
 11. Partial and buyer refunds (used tickets excluded, policy enforced), ledger reversal, replay-safe provider confirmation, cancellation batch: integration.
 12. Concurrent withdrawals (6 racing → 1), idempotency, re-auth requirement, fail/paid/reversed ledger movements, available vs gross balance: integration.

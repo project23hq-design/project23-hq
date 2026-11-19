@@ -3,17 +3,21 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 import type { OrgRole } from "@project23/domain";
+import { canAccess, type AdminCapability } from "./admin-access";
 
 export const getSession = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser(); // verified with the Auth server, not just the cookie
   const user = data.user ?? null;
   let aal: "aal1" | "aal2" | null = null;
+  // aal2 when the user has a verified authenticator app (whether or not this session used it).
+  let aalNext: "aal1" | "aal2" | null = null;
   if (user) {
     const { data: a } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     aal = (a?.currentLevel as "aal1" | "aal2" | null) ?? "aal1";
+    aalNext = (a?.nextLevel as "aal1" | "aal2" | null) ?? aal;
   }
-  return { supabase, user, aal };
+  return { supabase, user, aal, aalNext };
 });
 
 export async function requireUser(next = "/account") {
@@ -62,12 +66,18 @@ export async function requireOrg(slug: string, roles?: OrgRole[]) {
   return { ...s, org };
 }
 
-/** Platform staff: an active assignment AND an MFA-verified (aal2) session. */
-export async function requirePlatformAdmin() {
+/**
+ * Platform staff: an active assignment. Two-factor authentication is optional, but staff who
+ * have enrolled an authenticator app must verify it this session (the database enforces the
+ * same rule). Pass a capability to also require a role that grants it (lib/admin-access.ts).
+ */
+export async function requirePlatformAdmin(capability?: AdminCapability) {
   const s = await requireUser("/super-admin");
   const { data: roles } = await s.supabase.rpc("my_platform_roles");
   if (!roles || roles.length === 0) redirect("/?denied=admin");
-  if (s.aal !== "aal2") redirect("/account/security?mfa=required&next=/super-admin");
+  if (s.aalNext === "aal2" && s.aal !== "aal2")
+    redirect("/account/security?mfa=verify&next=/super-admin");
+  if (capability && !canAccess(roles as string[], capability)) redirect("/super-admin?denied=1");
   return { ...s, roles: roles as string[] };
 }
 

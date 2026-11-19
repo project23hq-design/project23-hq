@@ -72,6 +72,13 @@ export const ENGINE_ERRORS: Record<string, string> = {
   invalid_state: "Choose a valid state.",
   category_exists: "A category with that name already exists.",
   category_in_use: "Events use this category, so it can't be deleted. Rename it instead.",
+  cannot_target_self: "You can't do that to your own account.",
+  staff_target_requires_super_admin: "Only a super admin can do that to a staff account.",
+  already_verified: "This email address is already verified.",
+  user_not_found: "No account uses that email address. Ask them to sign up first.",
+  role_already_active: "They already have that role.",
+  role_not_active: "They don't have that role.",
+  last_super_admin: "There must always be at least one super admin.",
 };
 
 export function engineErrorMessage(
