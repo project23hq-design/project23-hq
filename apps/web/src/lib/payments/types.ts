@@ -15,8 +15,9 @@ export type WebhookEvent =
   | { kind: "charge"; reference: string }
   | {
       kind: "refund";
+      /** Reference of the original payment. Refund webhooks carry no refund id, so the
+       * handler re-checks every open refund on that payment with fetchRefund(). */
       transactionReference: string;
-      providerRefundId: string;
       status: "processed" | "failed" | "processing" | "pending";
     }
   | {
@@ -54,6 +55,10 @@ export interface PaymentProvider {
     providerRefundId: string;
     status: "pending" | "processing" | "processed" | "failed";
   }>;
+  /** Server-to-server refund status, by the id refund() returned. */
+  fetchRefund(
+    providerRefundId: string,
+  ): Promise<{ status: "pending" | "processing" | "processed" | "failed" | "not_found" }>;
   resolveAccount(input: {
     accountNumber: string;
     bankCode: string;
@@ -71,6 +76,8 @@ export interface PaymentProvider {
   }): Promise<{
     status: "success" | "pending" | "failed" | "otp" | "unknown";
     transferCode?: string;
+    /** Provider's explanation when the transfer is rejected. */
+    message?: string;
   }>;
   verifyTransfer(
     reference: string,

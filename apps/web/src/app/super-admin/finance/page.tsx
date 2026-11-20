@@ -13,32 +13,45 @@ import {
 } from "@project23/ui";
 import { requirePlatformAdmin } from "@/lib/auth";
 import { ActionForm } from "@/components/action-form";
-import { payoutDecisionAction, refundDecisionAction, settlementAction } from "../actions";
+import { BankDetailsReveal } from "@/components/admin/bank-details";
+import {
+  payoutBankDetailsAction,
+  payoutDecisionAction,
+  refundDecisionAction,
+  settlementAction,
+} from "../actions";
 
 export const metadata = { title: "Finance" };
 
 export default async function AdminFinance() {
   const { supabase } = await requirePlatformAdmin("finance");
-  const [{ data: payouts }, { data: refunds }, { data: disputes }] = await Promise.all([
-    supabase
-      .from("payout_requests")
-      .select(
-        "*, payout_recipients(bank_name, account_last4, account_name, status), organizations(name)",
-      )
-      .in("status", ["pending", "approved", "processing", "paid"])
-      .order("created_at", { ascending: false })
-      .limit(60),
-    supabase
-      .from("refund_requests")
-      .select("*, orders(public_ref, buyer_email)")
-      .in("status", ["requested", "failed", "processing"])
-      .order("created_at"),
-    supabase
-      .from("disputes")
-      .select("*, orders(public_ref)")
-      .order("opened_at", { ascending: false })
-      .limit(20),
-  ]);
+  const [{ data: payouts }, { data: refunds }, { data: disputes }, { data: transfers }] =
+    await Promise.all([
+      supabase
+        .from("payout_requests")
+        .select(
+          "*, payout_recipients(bank_name, account_last4, account_name, status), organizations(name)",
+        )
+        .in("status", ["pending", "approved", "processing", "paid"])
+        .order("created_at", { ascending: false })
+        .limit(60),
+      supabase
+        .from("refund_requests")
+        .select("*, orders(public_ref, buyer_email)")
+        .in("status", ["requested", "failed", "processing"])
+        .order("created_at"),
+      supabase
+        .from("disputes")
+        .select("*, orders(public_ref)")
+        .order("opened_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "paystack_transfers_enabled")
+        .maybeSingle(),
+    ]);
+  const automatic = transfers?.value === true;
   return (
     <div className="space-y-10">
       <h1 className="text-2xl font-medium tracking-[-0.02em] sm:text-[28px]">Finance</h1>
@@ -47,6 +60,18 @@ export default async function AdminFinance() {
         liabilities settled by approved payouts (Paystack Transfers when available, otherwise manual
         bank transfer with a recorded reference). A request is never shown as paid until confirmed.
       </Alert>
+      {automatic ? (
+        <Alert tone="success" title="Automatic payouts are on">
+          Approving a payout sends it through Paystack Transfers. It&apos;s marked paid when
+          Paystack confirms.
+        </Alert>
+      ) : (
+        <Alert tone="warning" title="Payouts are manual">
+          To pay an approved payout: open its bank details, send the amount from the Project23 bank
+          account, then mark it paid with the bank&apos;s transfer reference. Super admins can turn
+          on automatic Paystack payouts in Settings once Paystack enables Transfers.
+        </Alert>
+      )}
       <section>
         <h2 className="mb-4 text-base font-medium">Payout queue</h2>
         <Table>
@@ -108,6 +133,10 @@ export default async function AdminFinance() {
                   </Td>
                   <Td>
                     <div className="grid gap-2">
+                      {p.settlement_method === "manual_bank" &&
+                        (p.status === "approved" || p.status === "processing") && (
+                          <BankDetailsReveal payoutId={p.id} reveal={payoutBankDetailsAction} />
+                        )}
                       {next.map(([to, label]) => (
                         <ActionForm
                           key={to}

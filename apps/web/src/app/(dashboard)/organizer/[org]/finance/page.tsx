@@ -27,7 +27,8 @@ export default async function Finance({ params }: { params: Promise<{ org: strin
     supabase.rpc("org_balances", { p_org: org.id }),
     supabase
       .from("payout_recipients")
-      .select("*")
+      // Only the columns users may read (the provider recipient code is staff/service-only).
+      .select("id, bank_code, bank_name, account_name, account_last4, status, verified_at")
       .eq("organization_id", org.id)
       .neq("status", "disabled")
       .maybeSingle(),

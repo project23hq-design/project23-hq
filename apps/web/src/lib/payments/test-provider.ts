@@ -87,7 +87,6 @@ export class TestPaymentProvider implements PaymentProvider {
       return {
         kind: "refund",
         transactionReference: String(p.data?.transaction_reference),
-        providerRefundId: String(p.data?.id),
         status: "processed",
       };
     }
@@ -103,6 +102,15 @@ export class TestPaymentProvider implements PaymentProvider {
     return {
       providerRefundId: `test_rf_${input.transactionReference}_${input.amountMinor}_${Date.now()}`,
       status: "processed" as const,
+    };
+  }
+
+  /** Test refunds complete instantly (refund() returns "processed"). */
+  async fetchRefund(providerRefundId: string) {
+    return {
+      status: providerRefundId.startsWith("test_rf_")
+        ? ("processed" as const)
+        : ("not_found" as const),
     };
   }
 

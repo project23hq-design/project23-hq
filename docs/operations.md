@@ -15,13 +15,20 @@ A cron route without a scheduler is not a background system. Choose one of these
 
 ## What a tick does
 
-1. `run_maintenance()`: expires checkout holds (`FOR UPDATE SKIP LOCKED`), releases matured earnings exactly once, completes past events, queues `payment.reconcile` for attempts stuck in `initialized` for more than 15 minutes, and prunes rate-limit windows and referral visits older than 90 days.
+1. `run_maintenance()`: expires checkout holds (`FOR UPDATE SKIP LOCKED`), releases matured earnings exactly once, completes past events, queues `payment.reconcile` for attempts stuck in `initialized` for more than 15 minutes, queues `refund.reconcile` hourly for refunds still waiting on the provider after 30 minutes, and prunes rate-limit windows and referral visits older than 90 days.
 2. `jobs_claim(worker, 25)`: claims ready jobs with `SKIP LOCKED`. Jobs stuck in `running` for over 5 minutes (crashed worker) are reclaimed.
 3. Runs each handler, then `jobs_complete` or `jobs_fail`. Failures back off by 30s × 2^attempt (max 6 hours). After `max_attempts` (8) a job becomes `dead`.
 
-Job kinds: `order.deliver`, `ticket.reissued`, `order.exception_notice`, `refund.process`, `refund.completed_notice`, `event.cancelled`, `event.material_change`, `event.moderation_feedback`, `payment.reconcile`, `payout_recipient.verify`, `payout_recipient.changed_notice`, `payout.transfer`, `payout.status_notice`, `ops.alert`.
+Job kinds: `order.deliver`, `ticket.reissued`, `order.exception_notice`, `refund.process`, `refund.completed_notice`, `event.cancelled`, `event.material_change`, `event.moderation_feedback`, `payment.reconcile`, `refund.reconcile`, `payout_recipient.verify`, `payout_recipient.changed_notice`, `payout.transfer`, `payout.status_notice`, `ops.alert`.
 
 Handlers are idempotent. Emails go through `email_intent`, keyed by a dedupe key, so a retried job never sends twice. Ticket credentials are deterministic. Ledger posts are idempotency-keyed. `payout.transfer` re-verifies at the provider before sending.
+
+## Payouts: manual or automatic
+
+The super-admin setting **Automatic Paystack payouts** (`paystack_transfers_enabled`, default off) picks how approved organizer and promoter payouts are paid. The route is fixed when finance approves a payout.
+
+- **Off (manual).** Bank accounts are verified with Paystack's account-name lookup only. In `/super-admin/finance`, approve the payout and click **Show bank details** (every view is audited). Send the amount from the Project23 bank account with the narration shown, then **Mark paid** with the bank's transfer reference. If the bank returns it, use **Mark reversed**.
+- **On (automatic).** Approval sends the payout through Paystack Transfers; it's marked paid when Paystack confirms. The Paystack transfer recipient is created on first use. If Paystack definitively rejects the account or the transfer, the payout fails with Paystack's reason and the funds return to the beneficiary's balance. Turn this on only once Paystack has enabled Transfers for the business (a Registered account) and the Paystack balance can cover payouts.
 
 ## Failed jobs and delivery
 

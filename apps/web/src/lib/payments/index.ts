@@ -114,3 +114,93 @@ export async function confirmPayment(
   log.info("payment confirmed", { outcome: result.outcome, orderId: result.order_id });
   return result as { outcome: string; order_id?: string; order_status?: string };
 }
+
+/**
+ * Settle an in-flight refund from the provider's own record (never from a webhook body).
+ * Used by refund webhooks and by the maintenance sweep, so a missed webhook can't leave a
+ * refund stuck in "processing". Returns the status it found.
+ */
+export async function reconcileRefund(refundId: string): Promise<string> {
+  const db = adminClient();
+  const { data: rr } = await db
+    .from("refund_requests")
+    .select("id, status")
+    .eq("id", refundId)
+    .maybeSingle();
+  if (!rr || rr.status !== "processing") return "not_processing";
+  const { data: attempts } = await db
+    .from("refund_attempts")
+    .select("provider_refund_id, status")
+    .eq("refund_request_id", refundId)
+    .in("status", ["pending", "processing"])
+    .not("provider_refund_id", "is", null);
+  let found = "no_attempt";
+  for (const a of attempts ?? []) {
+    const { status } = await paymentProvider().fetchRefund(a.provider_refund_id!);
+    found = status;
+    if (status === "processed" || status === "failed") {
+      const { error } = await db.rpc("refund_mark_result", {
+        p_refund: refundId,
+        p_status: status,
+        p_provider_refund_id: a.provider_refund_id!,
+        p_failure: status === "failed" ? "Provider reported the refund failed" : undefined,
+      });
+      if (error) throw new Error(error.message);
+      return status;
+    }
+  }
+  return found;
+}
+
+/** Refund webhooks identify the original payment, not the refund: re-check its open refunds. */
+export async function reconcileRefundsForPayment(paymentReference: string): Promise<string> {
+  const { data: refunds } = await adminClient()
+    .from("refund_requests")
+    .select("id, payment_attempts!inner(reference)")
+    .eq("payment_attempts.reference", paymentReference)
+    .eq("status", "processing");
+  const results: string[] = [];
+  for (const r of refunds ?? []) results.push(await reconcileRefund(r.id));
+  return results.length ? `refund_${results.join(",")}` : "refund_none_open";
+}
+
+/** Platform switch: send approved payouts through Paystack Transfers (else finance pays by hand). */
+export async function automaticPayoutsEnabled(): Promise<boolean> {
+  const { data } = await adminClient()
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "paystack_transfers_enabled")
+    .maybeSingle();
+  return data?.value === true;
+}
+
+/**
+ * The provider's transfer-recipient code for a verified payout account, created on first use.
+ * Accounts verified while automatic payouts were off (or by the test provider) have none yet.
+ */
+export async function ensureTransferRecipient(recipientId: string): Promise<string> {
+  const db = adminClient();
+  const p = paymentProvider();
+  const { data: r } = await db
+    .from("payout_recipients")
+    .select("id, status, bank_code, account_name, provider_recipient_code")
+    .eq("id", recipientId)
+    .single();
+  if (!r || r.status !== "verified") throw new Error("payout account is not verified");
+  const code = r.provider_recipient_code;
+  const usable = code && (p.name === "test" || !code.startsWith("RCP_test_"));
+  if (usable) return code;
+  const { data: acct } = await db.rpc("payout_recipient_secret", { p_recipient: recipientId });
+  if (!acct) throw new Error("missing account number");
+  const { recipientCode } = await p.createRecipient({
+    name: r.account_name,
+    accountNumber: acct as string,
+    bankCode: r.bank_code,
+  });
+  const { error } = await db.rpc("payout_recipient_set_provider_code", {
+    p_recipient: recipientId,
+    p_code: recipientCode,
+  });
+  if (error) throw new Error(error.message);
+  return recipientCode;
+}

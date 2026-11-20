@@ -82,7 +82,8 @@ export default async function PromoterPage() {
     supabase.from("public_referral_programs").select("*").order("event_starts_at").limit(30),
     supabase
       .from("payout_recipients")
-      .select("*")
+      // Only the columns users may read (the provider recipient code is staff/service-only).
+      .select("id, bank_code, bank_name, account_name, account_last4, status, verified_at")
       .eq("user_id", user.id)
       .eq("beneficiary_kind", "promoter")
       .neq("status", "disabled")

@@ -172,7 +172,11 @@ export const payoutRecipientSchema = z.object({
   bankCode: z.string().regex(/^[0-9A-Za-z]{2,10}$/),
   bankName: z.string().trim().min(2).max(80),
   accountNumber: z.string().regex(/^\d{10}$/, "Enter a 10-digit NUBAN account number"),
-  accountName: z.string().trim().min(2).max(120),
+  accountName: z
+    .string({ error: "Enter the account name as it appears at your bank." })
+    .trim()
+    .min(2, "Enter the account name as it appears at your bank.")
+    .max(120),
 });
 
 export const refundRequestSchema = z.object({

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { sha256Hex } from "@project23/domain/server";
-import { paymentProvider, confirmPayment } from "@/lib/payments";
+import { paymentProvider, confirmPayment, reconcileRefundsForPayment } from "@/lib/payments";
 import { adminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/log";
 
@@ -64,19 +64,9 @@ export async function POST(request: Request) {
     if (evt.kind === "charge") {
       outcome = (await confirmPayment(evt.reference, "webhook")).outcome;
     } else if (evt.kind === "refund") {
-      const { data: attempt } = await db
-        .from("refund_attempts")
-        .select("refund_request_id")
-        .eq("provider_refund_id", evt.providerRefundId)
-        .maybeSingle();
-      if (attempt && (evt.status === "processed" || evt.status === "failed")) {
-        await db.rpc("refund_mark_result", {
-          p_refund: attempt.refund_request_id,
-          p_status: evt.status,
-          p_provider_refund_id: evt.providerRefundId,
-        });
-        outcome = `refund_${evt.status}`;
-      }
+      // Paystack's refund payload has no refund id, and its status is only a hint: re-check
+      // the open refunds on this payment with the provider before changing anything.
+      outcome = await reconcileRefundsForPayment(evt.transactionReference);
     } else if (evt.kind === "transfer") {
       const { data: po } = await db
         .from("payout_requests")

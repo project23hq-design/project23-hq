@@ -103,6 +103,42 @@ export async function payoutDecisionAction(_: ActionState, f: FormData): Promise
   return done(error, "Payout updated.", "/super-admin/finance");
 }
 
+export type PayoutBankDetails = {
+  account_number: string;
+  account_name: string;
+  bank_name: string;
+  bank_code: string;
+  amount_minor: number;
+  reference: string;
+};
+
+/** Full bank details for paying an approved manual payout. Each reveal is audited. */
+export async function payoutBankDetailsAction(
+  payoutId: string,
+): Promise<{ details?: PayoutBankDetails; error?: string }> {
+  const { supabase } = await requirePlatformAdmin("finance");
+  const { data, error } = await supabase.rpc("admin_payout_bank_details", { p_payout: payoutId });
+  if (error) return { error: engineErrorMessage(engineCode(error), error.message) };
+  return { details: data as unknown as PayoutBankDetails };
+}
+
+/** Super-admin switch between automatic (Paystack Transfers) and manual payouts. */
+export async function automaticPayoutsAction(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requirePlatformAdmin("settings");
+  const enabled = str(f, "enabled") === "true";
+  const { error } = await supabase.rpc("admin_set_setting", {
+    p_key: "paystack_transfers_enabled",
+    p_value: enabled,
+    p_reason: str(f, "reason"),
+  });
+  revalidatePath("/super-admin/finance");
+  return done(
+    error,
+    enabled ? "Automatic payouts are on." : "Automatic payouts are off.",
+    "/super-admin/settings",
+  );
+}
+
 export async function refundDecisionAction(_: ActionState, f: FormData): Promise<ActionState> {
   const { supabase } = await requirePlatformAdmin("finance");
   const op = str(f, "op");

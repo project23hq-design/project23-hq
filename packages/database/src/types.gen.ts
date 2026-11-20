@@ -1725,6 +1725,9 @@ isOneToOne: false
 "admin_overview":
 { Args: { "p_from": string,"p_to": string }; Returns: Json
                            },
+"admin_payout_bank_details":
+{ Args: { "p_payout": string }; Returns: Json
+                           },
 "admin_retry_job":
 { Args: { "p_job": number }; Returns: undefined
                            },
@@ -1921,6 +1924,9 @@ isOneToOne: false
                            },
 "payout_recipient_set":
 { Args: { "p_account_name": string,"p_account_number": string,"p_bank_code": string,"p_bank_name": string,"p_kind": string,"p_org": string }; Returns: string
+                           },
+"payout_recipient_set_provider_code":
+{ Args: { "p_code": string,"p_recipient": string }; Returns: undefined
                            },
 "payout_request":
 { Args: { "p_amount_minor": number,"p_idempotency_key": string,"p_kind": string,"p_org": string }; Returns: string

@@ -8,7 +8,7 @@ Location: `/Users/ayenikoemmanuel/Downloads/project23` (macOS user Downloads fol
 | - | --- | --- |
 | 1 | Foundation: workspace, design system, local Supabase, schema, migrations, auth, tenancy, RLS | Done |
 | 2 | Event creation and moderation, public discovery and event pages | Done |
-| 3 | Inventory, checkout, payment verification, fulfillment, email, retrieval | Done (test provider; Paystack adapter not exercised against Paystack's sandbox) |
+| 3 | Inventory, checkout, payment verification, fulfillment, email, retrieval | Done (test provider; Paystack test mode verified 2026-11-20 for payment and refund, payouts blocked at account level) |
 | 4 | Gate scanning, door sales and comps, organizer orders and attendees | Done |
 | 5 | Fees, ledger, refunds, disputes, payouts, referral programs, promoter dashboard, super-admin | Done |
 | 6 | Security and concurrency tests, visual polish, docs, validation | Done (see gaps) |
@@ -44,6 +44,34 @@ What the test suites cover against the acceptance criteria (spec §15/§16):
 14. Responsive and keyboard checks: E2E mobile (skip link, no horizontal overflow, keyboard ticket selection, sticky purchase bar, URL-persisted filters across back navigation, honest availability labels).
 15. Referral programs: single accrual on verified fulfillment under racing confirmations (10% after the 5% fee = ₦1,000/₦500/₦8,500 per ₦10,000), event scope, expired/future/forged/suspended links rejected, self-referral blocked and flagged, discounted base, free tickets excluded, rate snapshot vs new terms, exactly-once maturity, post-payout refund → recovery balance → offset from the next commission, proportional partial reversal, promoter privacy and balance separation: integration.
 
+## Paystack test mode (2026-11-20)
+
+Run locally against the local database with a real `sk_test_` key (`web-local-paystack` launch config), not production.
+
+| Flow | Result |
+| --- | --- |
+| Checkout → Paystack hosted page → return → verify → tickets | ✅ Order paid, QR issued, Paystack fee (₦30 on ₦2,000) and `sale`/`processor_fee` ledger entries recorded |
+| Refund (admin, full) → `POST /refund` | ✅ Accepted by Paystack (refund `pending` on their side), order refunded, tickets voided |
+| Refund settles | ⏳ Paystack still reports `pending`. The new hourly re-check (`refund.reconcile`) will complete it when Paystack does; verified that it does **not** complete early |
+| Signed webhooks (charge, refund), replay, bad signature | ✅ Processed, duplicate ignored, 401 respectively. A signed `refund.processed` doesn't settle a refund that Paystack still reports as pending |
+| Bank list, account resolve | ✅ 299 banks; resolve works (test mode only resolves bank code `001`) |
+| Transfers (automatic payouts) | ❌ Paystack refuses: "You cannot initiate third party payouts as a starter business". Needs the Paystack business upgraded to Registered |
+| Manual payouts (switch off, the default) | ✅ Organizer adds a bank account → verified by Paystack name lookup → requests ₦10,000 → finance approves, views bank details (audited) → marks paid with the bank reference. Ledger and organizer balances correct |
+| Switch on while Paystack blocks transfers | ✅ Payout fails straight away with Paystack's reason; funds return to the organizer's balance |
+| Disputes | Not triggerable in test mode; mapping fixed against Paystack's documented payloads and unit-tested |
+| Webhooks from Paystack itself | Not received locally (no public URL). Set `https://<site>/api/webhooks/paystack` in the Paystack dashboard; the app also verifies on return and by hourly sweeps, so webhooks aren't the only path |
+
+Defects found against the real API and docs, all fixed:
+
+- **Payout references were invalid for Paystack.** Paystack needs 16–50 lowercase characters; ours were like `PO-7KQ2MXH9PA`. Now sent as `p23-po-7kq2mxh9pa` and mapped back on webhooks.
+- **Refund webhooks could never match.** Paystack's refund payload has no refund id, so refunds would have stayed "processing" forever. The webhook now re-checks the refunds on that payment with `GET /refund/:id`, and the maintenance sweep re-checks any refund still processing after 30 minutes, hourly.
+- **Dispute outcomes were inverted.** `declined` (we won) was treated as lost, which would refund the order and void valid tickets; `auto-accepted` (we lost) was treated as won. Now: accepted → lost, declined → won, unknown → stays on hold.
+- **Paystack rejects some emails our form accepts** (e.g. `.test`). Buyers now get a clear message instead of a generic error, and the cause is logged.
+- **Demo orders paid with the test provider** would have retried refunds through Paystack forever. They now fail once with a note for finance to settle manually.
+- Paystack's rejection reason (e.g. the starter-business message) is now kept on a failed payout, and duplicate banks are removed from the bank list.
+- **Organizers and promoters could never see their saved bank account.** Their pages asked for every column, including the staff-only Paystack recipient code, so the database refused the query and the page showed "No bank account on file". They now ask only for readable columns.
+- **Manual payouts needed the full account number,** which no screen showed. Finance can now reveal it on approved manual payouts (audited).
+
 ## Defects found and fixed by testing
 
 - Guard triggers trusted the database login role. A privileged connection carrying user claims could bypass engine-field guards. Internal sessions are now defined by the engine flag, the service role, or an admin session **without request claims**.
@@ -54,7 +82,7 @@ What the test suites cover against the acceptance criteria (spec §15/§16):
 
 ## Not verified / known gaps
 
-- **Paystack sandbox:** the adapter (`apps/web/src/lib/payments/paystack.ts`) follows the documented API (initialize, verify, refund, resolve account, transfer recipient, transfer, verify transfer, banks, webhook HMAC-SHA512) but was **not run against Paystack's test environment**, because no `sk_test_` key was available. Dispute payload field mapping (`resolution` values) in particular must be confirmed with real test events.
+- **Paystack:** payment and refund are verified in test mode (see above). Automated payouts are blocked until the Paystack business is upgraded, disputes can't be triggered in test mode, and Paystack's own webhook deliveries need a public URL.
 - **Resend:** the adapter was not exercised (no API key). All email in tests goes through the capture adapter.
 - **Supabase Auth email flows** (verification link, password reset) were wired up but not exercised end to end in automated tests. Seeded users are pre-confirmed; Mailpit receives these emails locally.
 - **Camera scanning** uses `qr-scanner` and needs HTTPS plus a real camera. It was not tested automatically; manual entry and search were.
@@ -66,7 +94,7 @@ What the test suites cover against the acceptance criteria (spec §15/§16):
 
 ## Next actions
 
-1. Add Paystack test keys (`PAYMENT_PROVIDER=paystack`, `PAYSTACK_SECRET_KEY=sk_test_…`), expose a tunnel, and run the acceptance journey against the Paystack sandbox, including refund, transfer and dispute webhooks. Record the results here.
+1. Upgrade the Paystack business to Registered (needed for automated payouts), set the webhook URL in the Paystack dashboard, then switch Netlify to `PAYMENT_PROVIDER=paystack` with the test key and repeat one purchase and refund on the live site before going live.
 2. Configure Resend with a verified domain and send a test ticket email.
 3. Add Playwright coverage for the promoter apply → link → purchase → withdrawal UI and for organizer refunds.
 4. Run an axe accessibility scan in E2E; add a customer data-export page.

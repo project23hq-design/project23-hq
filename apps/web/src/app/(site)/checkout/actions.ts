@@ -7,6 +7,7 @@ import { adminClient } from "@/lib/supabase/admin";
 import { getSession } from "@/lib/auth";
 import { TestPaymentProvider } from "@/lib/payments/test-provider";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/log";
 
 async function canPay(orderId: string) {
   if (await browserCreatedOrder(orderId)) return true;
@@ -28,6 +29,9 @@ export async function payAction(orderId: string): Promise<{ error: string } | vo
     url = (await startPayment(orderId)).authorizationUrl;
   } catch (e) {
     const code = engineCode(e as { message: string; code?: string }) ?? (e as Error).message;
+    logger({ orderId, scope: "payment.start" }).error("could not start payment", {
+      error: String(e),
+    });
     return { error: engineErrorMessage(code, "We couldn't start the payment. Please try again.") };
   }
   redirect(url);

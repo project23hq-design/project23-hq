@@ -310,6 +310,100 @@ describe("payouts", () => {
     ]);
   });
 
+  it("settles by hand unless automatic payouts are on, decided at approval", async () => {
+    const { orgId, owner } = await freshOrg();
+    await availableBalance(orgId, owner, 4_000_000);
+    const grant = (id: string, role: string) =>
+      admin(
+        "insert into platform_role_assignments (user_id, role) values ($1, $2) on conflict (user_id, role) do update set revoked_at = null",
+        [id, role],
+      );
+    await grant(USERS.ops, "super_admin");
+    await grant(USERS.campus, "finance_admin");
+    const sup = user(USERS.ops, { aal: "aal2" });
+    const fin = user(USERS.campus, { aal: "aal2" });
+    const setSwitch = (who: ReturnType<typeof user>, value: string) =>
+      as(who, "select public.admin_set_setting('paystack_transfers_enabled', $1::jsonb, 'test')", [
+        value,
+      ]);
+    const request = async () =>
+      (
+        await as<{ id: string }>(
+          user(owner, { recentAuth: true }),
+          "select public.payout_request('organization', $1, 600000, $2) id",
+          [orgId, randomUUID()],
+        )
+      )[0]!.id;
+    const method = async (id: string) =>
+      (
+        await admin<{ m: string; jobs: number }>(
+          "select settlement_method m, (select count(*)::int from outbox_jobs where dedupe_key = 'payout.transfer:' || $1::text) jobs from payout_requests where id = $1::uuid",
+          [id],
+        )
+      )[0]!;
+    try {
+      // Off (the default): the account is paid by hand, never sent to Paystack.
+      const p1 = await request();
+      expect((await method(p1)).m).toBe("manual_bank");
+      await expectError(
+        as(fin, "select public.admin_payout_bank_details($1)", [p1]),
+        "invalid_transition",
+      ); // not approved yet
+      await as(fin, "select public.payout_transition($1, 'approved')", [p1]);
+      expect(await method(p1)).toEqual({ m: "manual_bank", jobs: 0 });
+
+      // Finance can see the full account number to pay it; the owner can't, and it's audited.
+      await expectError(
+        as(user(owner), "select public.admin_payout_bank_details($1)", [p1]),
+        "forbidden",
+      );
+      const [{ d }] = await as<{ d: { account_number: string; bank_code: string } }>(
+        fin,
+        "select public.admin_payout_bank_details($1) d",
+        [p1],
+      );
+      expect(d).toMatchObject({ account_number: "0123456789", bank_code: "058" });
+      const [{ n }] = await admin<{ n: number }>(
+        "select count(*)::int n from audit_logs where action = 'payout.bank_details_viewed' and entity_id = $1",
+        [p1],
+      );
+      expect(n).toBe(1);
+
+      // Only a super admin can flip the switch, and only to true/false.
+      await expectError(setSwitch(fin, "true"), "forbidden");
+      await expectError(setSwitch(sup, '"yes"'), "invalid_value");
+
+      // On: approval sends the payout through Paystack Transfers.
+      const requestedWhileOff = await request();
+      await setSwitch(sup, "true");
+      const p2 = await request();
+      expect((await method(p2)).m).toBe("paystack_transfer");
+      await as(fin, "select public.payout_transition($1, 'approved')", [p2]);
+      expect(await method(p2)).toEqual({ m: "paystack_transfer", jobs: 1 });
+      await expectError(
+        as(fin, "select public.admin_payout_bank_details($1)", [p2]),
+        "invalid_transition",
+      );
+
+      // The route is decided by the switch at approval, not at request.
+      await as(fin, "select public.payout_transition($1, 'approved')", [requestedWhileOff]);
+      expect(await method(requestedWhileOff)).toEqual({ m: "paystack_transfer", jobs: 1 });
+      const requestedWhileOn = await request();
+      await setSwitch(sup, "false");
+      await as(fin, "select public.payout_transition($1, 'approved')", [requestedWhileOn]);
+      expect(await method(requestedWhileOn)).toEqual({ m: "manual_bank", jobs: 0 });
+      expect(await unbalancedTransactions()).toBe(0);
+    } finally {
+      await admin(
+        "update platform_settings set value = 'false' where key = 'paystack_transfers_enabled'",
+      );
+      await admin(
+        "update platform_role_assignments set revoked_at = now() where (user_id, role) in (($1, 'super_admin'), ($2, 'finance_admin'))",
+        [USERS.ops, USERS.campus],
+      );
+    }
+  });
+
   it("refuses withdrawals above the available (not gross) balance", async () => {
     const { orgId, owner } = await freshOrg();
     const ev = await createEvent({

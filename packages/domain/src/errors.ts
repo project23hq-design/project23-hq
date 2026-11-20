@@ -22,6 +22,8 @@ export const ENGINE_ERRORS: Record<string, string> = {
   fee_policy_missing: "Checkout is temporarily unavailable. Please try again shortly.",
   unsupported_fee_configuration: "Checkout is temporarily unavailable.",
   order_not_payable: "This order can no longer be paid. Please start again.",
+  payment_email_rejected:
+    "Our payment provider couldn't accept that email address. Please start a new order with a different email.",
   too_many_payment_attempts: "Too many payment attempts for this order. Please start a new order.",
   invalid_idempotency_key: "Something went wrong. Please refresh and try again.",
   email_not_verified: "Please verify your email address first.",

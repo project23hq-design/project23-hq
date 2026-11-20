@@ -312,7 +312,7 @@ Once live, the routine is: push code to deploy, check the jobs page daily, and r
 
 **Not tested yet** (Step 7 is the first real run)
 
-- The Paystack code has never run against Paystack itself, only a local stand-in. Refunds, payouts and disputes need checking with test keys.
+- Paystack payments and refunds were tested with test keys (see `docs/progress.md`). Automatic payouts need Paystack Transfers, which a starter business can't use. Payouts stay manual until a super admin turns on **Automatic Paystack payouts** in Settings. Disputes can't be triggered in test mode.
 - Resend has never sent a real email.
 - Supabase sign-up and password-reset emails weren't tested end to end.
 - Camera QR scanning needs HTTPS and a real phone, so it's only testable once the site is live.

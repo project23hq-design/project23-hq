@@ -6,7 +6,13 @@ import { env } from "../env";
 import { deliverEmail } from "../email";
 import { esc, layout, text } from "../email/templates";
 import { issueTicketCredentials, renderTicketPdf, type TicketPdfData } from "../tickets";
-import { confirmPayment, paymentProvider } from "../payments";
+import {
+  automaticPayoutsEnabled,
+  confirmPayment,
+  ensureTransferRecipient,
+  paymentProvider,
+  reconcileRefund,
+} from "../payments";
 import { logger } from "../log";
 
 type PayloadKey =
@@ -196,6 +202,17 @@ const handlers: Record<string, Handler> = {
       provider: string;
     } | null;
     if (!attempt) throw new Error("refund has no captured payment attempt");
+    // A payment can only be refunded by the provider that took it (e.g. demo orders paid with
+    // the test provider can't be refunded through Paystack). Hand those to finance instead of
+    // retrying a call that can never succeed.
+    if (attempt.provider !== paymentProvider().name) {
+      await db().rpc("refund_mark_result", {
+        p_refund: refund_id,
+        p_status: "failed",
+        p_failure: `Paid through the "${attempt.provider}" provider, but the active provider is "${paymentProvider().name}". Settle this refund manually.`,
+      });
+      return;
+    }
     const res = await paymentProvider().refund({
       transactionReference: attempt.reference,
       amountMinor: rr.amount_minor,
@@ -210,6 +227,10 @@ const handlers: Record<string, Handler> = {
             : "processing",
       p_provider_refund_id: res.providerRefundId,
     });
+  },
+
+  async "refund.reconcile"({ refund_id }) {
+    await reconcileRefund(refund_id);
   },
 
   async "refund.completed_notice"({ refund_id }) {
@@ -364,14 +385,20 @@ const handlers: Record<string, Handler> = {
     });
     if (!resolved)
       throw new Error("account could not be resolved (will retry; check bank code/number)");
-    const { recipientCode } = await p.createRecipient({
-      name: resolved.accountName,
-      accountNumber: acct as string,
-      bankCode: r.bank_code,
-    });
+    // The name lookup is the verification. A Paystack transfer recipient is only needed for
+    // automatic payouts; with them off it's created later, when a transfer first needs it.
+    const recipientCode = (await automaticPayoutsEnabled())
+      ? (
+          await p.createRecipient({
+            name: resolved.accountName,
+            accountNumber: acct as string,
+            bankCode: r.bank_code,
+          })
+        ).recipientCode
+      : null;
     await db().rpc("payout_recipient_mark_verified", {
       p_recipient: recipient_id,
-      p_recipient_code: recipientCode,
+      p_recipient_code: recipientCode as string,
       p_resolved_name: resolved.accountName,
     });
   },
@@ -413,10 +440,11 @@ const handlers: Record<string, Handler> = {
   async "payout.transfer"({ payout_id }) {
     const { data: po } = await db()
       .from("payout_requests")
-      .select("*, payout_recipients(provider_recipient_code)")
+      .select("*")
       .eq("id", payout_id)
       .single();
     if (!po || !["approved", "processing"].includes(po.status)) return;
+    if (po.settlement_method !== "paystack_transfer") return;
     const p = paymentProvider();
     // Reconcile before (re)trying: an earlier ambiguous attempt may have succeeded.
     const existing = await p.verifyTransfer(po.reference);
@@ -441,10 +469,21 @@ const handlers: Record<string, Handler> = {
       });
       return;
     }
-    const recipientCode = (
-      po.payout_recipients as unknown as { provider_recipient_code: string | null }
-    )?.provider_recipient_code;
-    if (!recipientCode) throw new Error("recipient not verified with provider");
+    let recipientCode: string;
+    try {
+      recipientCode = await ensureTransferRecipient(po.recipient_id);
+    } catch (e) {
+      // A 4xx from Paystack is a definite "no" (e.g. account can't be resolved): fail the payout
+      // now so the funds return to the balance and finance sees why. Anything else retries.
+      const m = /^paystack_recipient_failed:4\d\d:(.*)$/.exec((e as Error).message);
+      if (!m) throw e;
+      await db().rpc("payout_transition", {
+        p_payout: payout_id,
+        p_to: "failed",
+        p_note: `Paystack couldn't set up this bank account for transfers: ${m[1]}`,
+      });
+      return;
+    }
     if (po.status === "approved")
       await db().rpc("payout_transition", { p_payout: payout_id, p_to: "processing" });
     const res = await p.transfer({
@@ -463,7 +502,9 @@ const handlers: Record<string, Handler> = {
       await db().rpc("payout_transition", {
         p_payout: payout_id,
         p_to: "failed",
-        p_note: "Provider rejected transfer",
+        p_note: res.message
+          ? `Provider rejected transfer: ${res.message}`
+          : "Provider rejected transfer",
       });
     else throw new Error(`transfer status ${res.status}; awaiting webhook or re-check`);
   },
