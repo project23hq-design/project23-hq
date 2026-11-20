@@ -29,7 +29,10 @@ export async function signInAction(_: State, form: FormData): Promise<State> {
           : "Incorrect email or password.",
     };
   await supabase.rpc("link_my_orders");
-  redirect(safeNext(String(form.get("next") ?? ""), "/account"));
+  // Platform staff land on the admin dashboard unless a page sent them here with ?next=.
+  const { data: roles } = await supabase.rpc("my_platform_roles");
+  const home = roles && roles.length > 0 ? "/super-admin" : "/account";
+  redirect(safeNext(String(form.get("next") ?? ""), home));
 }
 
 export async function signUpAction(_: State, form: FormData): Promise<State> {
